@@ -32,8 +32,7 @@
             "description": "Start of time range stated in hours. If not specified, the default is past 3 days"
         }
     },
-    "actions": [
-        {
+    "actions": [{
             "action": "test connectivity",
             "identifier": "test_connectivity",
             "description": "Validate the asset configuration for connectivity using supplied configuration",
@@ -96,12 +95,6 @@
                     ],
                     "order": 0
                 },
-                "wait": {
-                    "description": "Wait for job to finish before returning results",
-                    "data_type": "boolean",
-                    "default": true,
-                    "order": 1
-                },
                 "timeout": {
                     "description": "Maximum time (in minutes) to wait for job to be complete",
                     "data_type": "numeric",
@@ -109,8 +102,7 @@
                     "order": 2
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -2638,12 +2630,6 @@
                     ],
                     "order": 0
                 },
-                "wait": {
-                    "description": "Wait for job to finish before returning results",
-                    "data_type": "boolean",
-                    "default": true,
-                    "order": 1
-                },
                 "timeout": {
                     "description": "Maximum time (in minutes) to wait for job to be complete",
                     "data_type": "numeric",
@@ -2651,8 +2637,7 @@
                     "order": 2
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -3993,8 +3978,7 @@
                     "default": 10
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -4690,8 +4674,7 @@
                     "order": 0
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -4786,8 +4769,7 @@
                     "order": 0
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -4881,12 +4863,6 @@
                     ],
                     "order": 0
                 },
-                "wait": {
-                    "description": "Wait for job to finish before returning results",
-                    "data_type": "boolean",
-                    "default": true,
-                    "order": 1
-                },
                 "timeout": {
                     "description": "Maximum time (in minutes) to wait for job to be complete",
                     "data_type": "numeric",
@@ -4894,8 +4870,7 @@
                     "order": 2
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -5053,12 +5028,6 @@
                     ],
                     "order": 0
                 },
-                "wait": {
-                    "description": "Wait for job to finish before returning results",
-                    "data_type": "boolean",
-                    "default": true,
-                    "order": 1
-                },
                 "timeout": {
                     "description": "Maximum time (in minutes) to wait for job to be complete",
                     "data_type": "numeric",
@@ -5066,8 +5035,7 @@
                     "order": 2
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -5222,8 +5190,7 @@
         }
     ],
     "pip_dependencies": {
-        "wheel": [
-            {
+        "wheel": [{
                 "module": "certifi",
                 "input_file": "wheels/py3/certifi-2022.12.7-py3-none-any.whl"
             },

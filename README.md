@@ -28,6 +28,21 @@ A threat analysis platform to reduce the friction of repetitive manual tasks typ
 href="https://www.google.com/url?q=https://www.twinwave.io/&amp;sa=D&amp;source=editors&amp;ust=1644536802576291&amp;usg=AOvVaw1QbcnelmQFirXDHIRabB07"
 target="_blank">Splunk Attack Analyzer analysis platform</a>
 
+Manual polling:
+
+- Maximum containers count should be considered
+- No check for ingesting duplicate data (state file should not be updated during manual polling)
+- Pagination
+
+Schedule polling:
+
+- In the first cycle, all the data(pagination) from the entered hour in "since" should be ingested
+  and after the ingestion is the complete, state file should be updated with the "UpdatedAt" time of
+  the latest/first record.
+- In the following cycles, all the records from the given hour in "since" should be ingested, and if
+  while ingesting, the app finds "UpdatedAt" time of already ingested record, the ingestion should
+  stop
+
 The following actions are supported by the app:
 
 - Submitting a URL for analysis
@@ -97,7 +112,6 @@ Read only: **False**
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **job\_id** |  required  | Job id of the forensics you want pulled | string |  `splunk attack analyzer job id` 
-**wait** |  optional  | Wait for job to finish before returning results | boolean | 
 **timeout** |  optional  | Maximum time \(in minutes\) to wait for job to be complete | numeric | 
 
 #### Action Output
@@ -548,7 +562,6 @@ Read only: **False**
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **job\_id** |  required  | Job id of the job summary you want to fetch | string |  `splunk attack analyzer job id` 
-**wait** |  optional  | Wait for job to finish before returning results | boolean | 
 **timeout** |  optional  | Maximum time \(in minutes\) to wait for job to be complete | numeric | 
 
 #### Action Output
@@ -1011,7 +1024,6 @@ Read only: **False**
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **job\_id** |  required  | Job id of the job summary you want to download the PDF for | string |  `splunk attack analyzer job id` 
-**wait** |  optional  | Wait for job to finish before returning results | boolean | 
 **timeout** |  optional  | Maximum time \(in minutes\) to wait for job to be complete | numeric | 
 
 #### Action Output
@@ -1046,7 +1058,6 @@ Read only: **False**
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **job\_id** |  required  | Job id of the job summary you want to download the PDF for | string |  `splunk attack analyzer job id` 
-**wait** |  optional  | Wait for job to finish before returning results | boolean | 
 **timeout** |  optional  | Maximum time \(in minutes\) to wait for job to be complete | numeric | 
 
 #### Action Output

@@ -20,6 +20,20 @@
     </a>
 </h3>
 <p>
+    Manual polling:
+    <ul>
+        <li>Maximum containers count should be considered</li>
+        <li>No check for ingesting duplicate data (state file should not be updated during manual polling)</li>
+        <li>Pagination</li>
+    </ul>
+
+    Schedule polling:
+    <ul>
+        <li>In the first cycle, all the data(pagination) from the entered hour in "since" should be ingested and after the ingestion is the complete, state file should be updated with the "UpdatedAt" time of the latest/first record.</li>
+        <li>In the following cycles, all the records from the given hour in "since" should be ingested, and if while ingesting, the app finds "UpdatedAt" time of already ingested record, the ingestion should stop</li>
+    </ul>
+</p>
+<p>
     The following actions are supported by the app:
         <ul>
             <li>Submitting a URL for analysis</li>

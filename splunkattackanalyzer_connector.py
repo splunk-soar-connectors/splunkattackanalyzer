@@ -134,7 +134,6 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         self.save_progress("Connecting to endpoint")
 
-        should_wait = params.get("wait", True)
         ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 30), "timeout")
         if phantom.is_fail(ret_val):
             return action_result.get_status()
@@ -142,8 +141,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         job_id = params["job_id"]
 
         try:
-            if should_wait:
-                self._get_job_data(job_id, should_wait, timeout_in_minutes)
+
+            self._get_job_data(action_result, job_id, timeout_in_minutes)
 
             job_fore = self._splunkattackanalyzer.get_job_normalized_forensics(job_id)
 
@@ -252,13 +251,18 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
 
+        manual_polling = self.is_poll_now()
+
+        if not manual_polling:
+            self.debug_print("DEBUGGER: Starting polling now")
+            checkpoint = self._state.get("UpdatedAt_Checkpoint", "0001-01-01T00:00:00.00Z")
+            datetime_checkpoint = datetime.strptime(checkpoint, "%Y-%m-%dT%H:%M:%S.%fZ")
+
         action_result = self.add_action_result(ActionResult(dict(params)))
         ret_val, limit = _validate_integer(action_result, params.get("container_count", 0), "container_count")
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
-        checkpoint = self._state.get("UpdatedAt_Checkpoint", "0001-01-01T00:00:00.00Z")
-        datetime_checkpoint = datetime.strptime(checkpoint, "%Y-%m-%dT%H:%M:%S.%fZ")
         try:
             payload = self._splunkattackanalyzer.poll_for_done_jobs(limit)
         except Exception as e:
@@ -267,75 +271,81 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         jobs = payload
         if jobs:
             for job in jobs:
-                if datetime.strptime(job["UpdatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ") >= datetime_checkpoint:
-                    container = {}
-                    job_id = job["ID"]
-                    submission_name = job["Submission"]["Name"]
-                    container["name"] = submission_name
-                    container["source_data_identifier"] = job_id
-                    container["run_automation"] = True
-                    container["data"] = job
-                    container["artifacts"] = []
-
-                    for resource in job["Resources"]:
-                        severity = "low"
-                        if resource["DisplayScore"] >= 70:
-                            severity = "high"
-                        elif resource["DisplayScore"] >= 30:
-                            severity = "medium"
-
-                        if resource["Type"] == "URL":
-                            container["artifacts"].append(
-                                {
-                                    "data": resource,
-                                    "cef": {"requestURL": resource["Name"]},
-                                    "label": "url",
-                                    "name": resource["Name"],
-                                    "severity": severity,
-                                    "type": "url",
-                                }
-                            )
-                        elif resource["Type"] == "file":
-                            container["artifacts"].append(
-                                {
-                                    "data": resource,
-                                    "cef": {
-                                        "fileName": resource["Name"],
-                                        "fileHash": resource["FileMetadata"]["SHA256"],
-                                        "fileSize": resource["FileMetadata"]["Size"],
-                                        "fileType": resource["FileMetadata"]["MimeType"],
-                                    },
-                                    "label": "file",
-                                    "name": resource["Name"],
-                                    "severity": severity,
-                                    "type": "file",
-                                }
-                            )
-
-                    ret_val, msg, cid = self.save_container(container)
-                    if phantom.is_fail(ret_val):
-                        self.save_progress("Error saving container: {}".format(msg))
-                        self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
-            self._state["UpdatedAt_Checkpoint"] = jobs[0].get("UpdatedAt")
+                if manual_polling:
+                    self.add_to_container(job)
+                elif datetime.strptime(job["UpdatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ") >= datetime_checkpoint:
+                    self.add_to_container(job)
+            if not manual_polling:
+                self._state["UpdatedAt_Checkpoint"] = jobs[0].get("UpdatedAt")
+                self.save_state(self._state)
         else:
             self.debug_print("payload_empty")
-        self.save_state(self._state)
         return action_result.set_status(phantom.APP_SUCCESS)
 
-    def _get_job_data(self, action_result, job_id, should_wait, timeout_in_minutes):
+    def add_to_container(self, job):
+        container = {}
+        job_id = job["ID"]
+        submission_name = job["Submission"]["Name"]
+        container["name"] = submission_name
+        container["source_data_identifier"] = job_id
+        container["run_automation"] = True
+        container["data"] = job
+        container["artifacts"] = []
+
+        for resource in job["Resources"]:
+            severity = "low"
+            if resource["DisplayScore"] >= 70:
+                severity = "high"
+            elif resource["DisplayScore"] >= 30:
+                severity = "medium"
+
+            if resource["Type"] == "URL":
+                container["artifacts"].append(
+                    {
+                        "data": resource,
+                        "cef": {"requestURL": resource["Name"]},
+                        "label": "url",
+                        "name": resource["Name"],
+                        "severity": severity,
+                        "type": "url",
+                    }
+                )
+            elif resource["Type"] == "file":
+                container["artifacts"].append(
+                    {
+                        "data": resource,
+                        "cef": {
+                            "fileName": resource["Name"],
+                            "fileHash": resource["FileMetadata"]["SHA256"],
+                            "fileSize": resource["FileMetadata"]["Size"],
+                            "fileType": resource["FileMetadata"]["MimeType"],
+                        },
+                        "label": "file",
+                        "name": resource["Name"],
+                        "severity": severity,
+                        "type": "file",
+                    }
+                )
+
+        ret_val, msg, cid = self.save_container(container)
+        if phantom.is_fail(ret_val):
+            self.save_progress("Error saving container: {}".format(msg))
+            self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
+
+    def _get_job_data(self, action_result, job_id, timeout_in_minutes):
         start_time = time.time()
         while True:
-            self.debug_print("======{}=======".format(time.time() < start_time + timeout_in_minutes * 60))
             try:
                 job_summary = self._splunkattackanalyzer.get_job(job_id)
 
                 if job_summary.get("State") == "done":
                     return job_summary, action_result.set_status(phantom.APP_SUCCESS)
-                if job_summary.get("State") not in ("done", "error") and should_wait:
+                if job_summary.get("State") not in ("done", "error"):
                     self.debug_print("Job is in state '{}', waiting and retrying..".format(job_summary.get("State")))
                     time.sleep(JOB_POLL_INTERVAL)
                     continue
                 elif time.time() < start_time + timeout_in_minutes * 60:
+                    time.sleep(JOB_POLL_INTERVAL)
                     continue
                 else:
                     return None, action_result.set_status(phantom.APP_ERROR, "Timed out waiting for job to be complete")
@@ -350,17 +360,16 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         self.save_progress("Connecting to endpoint")
 
-        should_wait = params.get("wait", True)
         ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 30), "timeout")
         if phantom.is_fail(ret_val):
             return action_result.get_status()
         job_id = params["job_id"]
 
         self.debug_print(
-            "Getting summary for job ID: {}, wait: {}, timeout: {}".format(params.get("job_id"), params.get("wait"), params.get("timeout"))
+            "Getting summary for job ID: {}, timeout: {}".format(params.get("job_id"), params.get("timeout"))
         )
 
-        job_summary, ret_val = self._get_job_data(action_result, job_id, should_wait, timeout_in_minutes)
+        job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
@@ -381,18 +390,16 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         self.save_progress("Connecting to endpoint")
 
-        should_wait = params.get("wait", True)
         ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 30), "timeout")
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         job_id = params.get("job_id")
 
-        if should_wait:
-            # do this just to make sure the job is completed
-            job_summary, ret_val = self._get_job_data(action_result, job_id, should_wait, timeout_in_minutes)
-            if phantom.is_fail(ret_val):
-                return action_result.get_status()
+        # do this just to make sure the job is completed
+        job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
 
         try:
             pdf_data = self._splunkattackanalyzer.download_job_pdf(job_id)
@@ -415,17 +422,15 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         self.save_progress("Connecting to endpoint")
 
-        should_wait = params.get("wait", True)
         ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 30), "timeout")
         if phantom.is_fail(ret_val):
             return action_result.get_status()
         job_id = params.get("job_id")
 
-        if should_wait:
-            # do this just to make sure the job is completed
-            job_summary, ret_val = self._get_job_data(action_result, job_id, should_wait, timeout_in_minutes)
-            if phantom.is_fail(ret_val):
-                return action_result.get_status()
+        # do this just to make sure the job is completed
+        job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
 
         try:
             forensics = self._splunkattackanalyzer.get_job_normalized_forensics(job_id)

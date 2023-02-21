@@ -93,7 +93,7 @@ class SplunkAttackAnalyzer:
             job_list.extend(resp_json.get("Jobs"))
 
             if limit <= len(job_list):
-                return job_list
+                return job_list[:limit]
 
             if len(job_list) == 25:
                 self.poll_paginate(resp_json["NextToken"], url, job_list, limit)
@@ -112,6 +112,7 @@ class SplunkAttackAnalyzer:
             job_list.extend(resp_json["Jobs"])
             next_token = resp_json["NextToken"]
             if limit <= len(job_list):
+                job_list = job_list[:limit]
                 break
 
     def get_engines(self):
