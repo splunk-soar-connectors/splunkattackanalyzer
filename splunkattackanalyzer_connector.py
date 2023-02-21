@@ -15,6 +15,7 @@
 
 # Phantom App imports
 import time
+from datetime import datetime
 
 import phantom.app as phantom
 from phantom import vault
@@ -252,90 +253,94 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
 
         action_result = self.add_action_result(ActionResult(dict(params)))
-        state_dict = self.load_state()
-        next_token = state_dict.get("token", None)
+        ret_val, limit = _validate_integer(action_result, params.get("container_count", 0), "container_count")
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+
+        checkpoint = self._state.get("UpdatedAt_Checkpoint", "0001-01-01T00:00:00.00Z")
+        datetime_checkpoint = datetime.strptime(checkpoint, "%Y-%m-%dT%H:%M:%S.%fZ")
         try:
-            payload = self._splunkattackanalyzer.poll_for_done_jobs(next_token)
+            payload = self._splunkattackanalyzer.poll_for_done_jobs(limit)
         except Exception as e:
             self.save_progress(str(e))
             return action_result.set_status(phantom.APP_ERROR, "Unable to get jobs")
-        jobs = payload.get("Jobs")
+        jobs = payload
         if jobs:
             for job in jobs:
-                container = {}
-                job_id = job["ID"]
-                submission_name = job["Submission"]["Name"]
-                container["name"] = submission_name
-                container["source_data_identifier"] = job_id
-                container["run_automation"] = True
-                container["data"] = job
-                container["artifacts"] = []
+                if datetime.strptime(job["UpdatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ") >= datetime_checkpoint:
+                    container = {}
+                    job_id = job["ID"]
+                    submission_name = job["Submission"]["Name"]
+                    container["name"] = submission_name
+                    container["source_data_identifier"] = job_id
+                    container["run_automation"] = True
+                    container["data"] = job
+                    container["artifacts"] = []
 
-                for resource in job["Resources"]:
-                    severity = "low"
-                    if resource["DisplayScore"] >= 70:
-                        severity = "high"
-                    elif resource["DisplayScore"] >= 30:
-                        severity = "medium"
+                    for resource in job["Resources"]:
+                        severity = "low"
+                        if resource["DisplayScore"] >= 70:
+                            severity = "high"
+                        elif resource["DisplayScore"] >= 30:
+                            severity = "medium"
 
-                    if resource["Type"] == "URL":
-                        container["artifacts"].append(
-                            {
-                                "data": resource,
-                                "cef": {"requestURL": resource["Name"]},
-                                "label": "url",
-                                "name": resource["Name"],
-                                "severity": severity,
-                                "type": "url",
-                            }
-                        )
-                    elif resource["Type"] == "file":
-                        container["artifacts"].append(
-                            {
-                                "data": resource,
-                                "cef": {
-                                    "fileName": resource["Name"],
-                                    "fileHash": resource["FileMetadata"]["SHA256"],
-                                    "fileSize": resource["FileMetadata"]["Size"],
-                                    "fileType": resource["FileMetadata"]["MimeType"],
-                                },
-                                "label": "file",
-                                "name": resource["Name"],
-                                "severity": severity,
-                                "type": "file",
-                            }
-                        )
+                        if resource["Type"] == "URL":
+                            container["artifacts"].append(
+                                {
+                                    "data": resource,
+                                    "cef": {"requestURL": resource["Name"]},
+                                    "label": "url",
+                                    "name": resource["Name"],
+                                    "severity": severity,
+                                    "type": "url",
+                                }
+                            )
+                        elif resource["Type"] == "file":
+                            container["artifacts"].append(
+                                {
+                                    "data": resource,
+                                    "cef": {
+                                        "fileName": resource["Name"],
+                                        "fileHash": resource["FileMetadata"]["SHA256"],
+                                        "fileSize": resource["FileMetadata"]["Size"],
+                                        "fileType": resource["FileMetadata"]["MimeType"],
+                                    },
+                                    "label": "file",
+                                    "name": resource["Name"],
+                                    "severity": severity,
+                                    "type": "file",
+                                }
+                            )
 
-                ret_val, msg, cid = self.save_container(container)
-                if phantom.is_fail(ret_val):
-                    self.save_progress("Error saving container: {}".format(msg))
-                    self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
+                    ret_val, msg, cid = self.save_container(container)
+                    if phantom.is_fail(ret_val):
+                        self.save_progress("Error saving container: {}".format(msg))
+                        self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
+            self._state["UpdatedAt_Checkpoint"] = jobs[0].get("UpdatedAt")
         else:
             self.debug_print("payload_empty")
-        state_dict["token"] = payload.get("NextToken")
-        self.save_state(state_dict)
+        self.save_state(self._state)
         return action_result.set_status(phantom.APP_SUCCESS)
 
-    def _get_job_data(self, job_id, should_wait, timeout_in_minutes):
+    def _get_job_data(self, action_result, job_id, should_wait, timeout_in_minutes):
         start_time = time.time()
         while True:
+            self.debug_print("======{}=======".format(time.time() < start_time + timeout_in_minutes * 60))
             try:
                 job_summary = self._splunkattackanalyzer.get_job(job_id)
 
+                if job_summary.get("State") == "done":
+                    return job_summary, action_result.set_status(phantom.APP_SUCCESS)
                 if job_summary.get("State") not in ("done", "error") and should_wait:
                     self.debug_print("Job is in state '{}', waiting and retrying..".format(job_summary.get("State")))
                     time.sleep(JOB_POLL_INTERVAL)
                     continue
-                elif time.time() > start_time + timeout_in_minutes * 60:
-                    self.debug_print("Giving up polling for job status")
-                    self.save_progress("Timed out waiting for job to be complete")
-                    return None
+                elif time.time() < start_time + timeout_in_minutes * 60:
+                    continue
                 else:
-                    return job_summary
+                    return None, action_result.set_status(phantom.APP_ERROR, "Timed out waiting for job to be complete")
             except Exception as e:
-                self.save_progress(str(e))
-                self.save_progress("Unable to get job")
-                return None
+                return None, action_result.set_status(phantom.APP_ERROR, "Exception occured: {}".format(str(e)))
 
     def _handle_splunk_attack_analyzer_get_job_summary(self, params):
 
@@ -355,9 +360,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             "Getting summary for job ID: {}, wait: {}, timeout: {}".format(params.get("job_id"), params.get("wait"), params.get("timeout"))
         )
 
-        job_summary = self._get_job_data(job_id, should_wait, timeout_in_minutes)
-        if not job_summary:
-            return action_result.set_status(phantom.APP_ERROR, "Job not found")
+        job_summary, ret_val = self._get_job_data(action_result, job_id, should_wait, timeout_in_minutes)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
 
         job_summary["ResourceTree"] = _make_resource_tree(job_summary["Resources"])
 
@@ -385,9 +390,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         if should_wait:
             # do this just to make sure the job is completed
-            job_summary = self._get_job_data(job_id, should_wait, timeout_in_minutes)
-            if not job_summary:
-                return action_result.set_status(phantom.APP_ERROR, "Job not found")
+            job_summary, ret_val = self._get_job_data(action_result, job_id, should_wait, timeout_in_minutes)
+            if phantom.is_fail(ret_val):
+                return action_result.get_status()
 
         try:
             pdf_data = self._splunkattackanalyzer.download_job_pdf(job_id)
@@ -418,9 +423,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         if should_wait:
             # do this just to make sure the job is completed
-            job_summary = self._get_job_data(job_id, should_wait, timeout_in_minutes)
-            if not job_summary:
-                return action_result.set_status(phantom.APP_ERROR, "Job not found")
+            job_summary, ret_val = self._get_job_data(action_result, job_id, should_wait, timeout_in_minutes)
+            if phantom.is_fail(ret_val):
+                return action_result.get_status()
 
         try:
             forensics = self._splunkattackanalyzer.get_job_normalized_forensics(job_id)

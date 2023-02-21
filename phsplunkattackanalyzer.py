@@ -74,26 +74,45 @@ class SplunkAttackAnalyzer:
             params["start"] = params["start"] + 100
             num_jobs = num_jobs - 100
 
-    def poll_for_done_jobs(self, token):
+    def poll_for_done_jobs(self, limit):
         url = f"{self._host}/jobs/poll"
         time_now = datetime.now()
-        if token:
-            resp = requests.get(url, params={"token": token}, headers=self.get_header(), timeout=REQUEST_TIMEOUT)
+        job_list = list()
+        since = self._since
+
+        if not since:
+            since = 24
+            prev_date = time_now - timedelta(hours=since)
+            epoch_convert_time = prev_date.timestamp()
         else:
-            since = self._since
-            if not since:
-                since = 24
-                prev_date = time_now - timedelta(hours=since)
-                epoch_convert_time = prev_date.timestamp()
-            else:
-                prev_date = time_now - timedelta(hours=since)
-                epoch_convert_time = prev_date.timestamp()
-            try:
-                resp = requests.get(url, params={"since": int(epoch_convert_time)}, headers=self.get_header(), timeout=REQUEST_TIMEOUT)
-            except Exception:
-                time.sleep(10)
-            payload = resp.json()
-        return payload
+            prev_date = time_now - timedelta(hours=since)
+            epoch_convert_time = prev_date.timestamp()
+        try:
+            resp = requests.get(url, params={"since": int(epoch_convert_time)}, headers=self.get_header(), timeout=REQUEST_TIMEOUT)
+            resp_json = resp.json()
+            job_list.extend(resp_json.get("Jobs"))
+
+            if limit <= len(job_list):
+                return job_list
+
+            if len(job_list) == 25:
+                self.poll_paginate(resp_json["NextToken"], url, job_list, limit)
+
+        except Exception:
+            time.sleep(10)
+
+        return job_list
+
+    def poll_paginate(self, next_token, url, job_list, limit):
+        while True:
+            resp = requests.get(url, params={"token": next_token}, headers=self.get_header(), timeout=REQUEST_TIMEOUT)
+            resp_json = resp.json()
+            if len(resp_json["Jobs"]) == 0:
+                break
+            job_list.extend(resp_json["Jobs"])
+            next_token = resp_json["NextToken"]
+            if limit <= len(job_list):
+                break
 
     def get_engines(self):
         url = f"{self._host}/engines"

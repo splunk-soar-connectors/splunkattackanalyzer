@@ -68,7 +68,7 @@
                 "container_count": {
                     "data_type": "numeric",
                     "order": 3,
-                    "description": "Parameter ignored in this app"
+                    "description": "Number of jobs to ingest"
                 },
                 "artifact_count": {
                     "data_type": "numeric",
@@ -1013,7 +1013,7 @@
                     "data_path": "action_result.data.*.HTTP.*.ResponseHeaders.etag",
                     "data_type": "string",
                     "example_values": [
-                        "\"e54addba509fc772b0c96c43fd912559\""
+                        "\"e54addba509\""
                     ]
                 },
                 {
