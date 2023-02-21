@@ -104,7 +104,6 @@
             <h4 class="wf-h4-style">No data found</h4>
         {% else %}
             {% with job=result.data%}
-
                 <h2>{{job.Submission.Name}}</h2>
                 <a href="https://app.twinwave.io/job/{{job.ID}}">view in splunk attack analyzer <i class="fa fa-external-link-square"></i></a>
                 <table class="jobmeta">
@@ -175,9 +174,8 @@
                     {% endfor %}
                     </ul>
                 </div>
-
             {% endwith %}
-
+        {% endif %}
     {% endfor %}
 
 </div>

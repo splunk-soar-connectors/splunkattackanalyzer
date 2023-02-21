@@ -134,7 +134,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         self.save_progress("Connecting to endpoint")
 
-        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 30), "timeout")
+        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout", True)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
@@ -338,12 +338,10 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             try:
                 job_summary = self._splunkattackanalyzer.get_job(job_id)
 
-                if job_summary.get("State") == "done":
+                if timeout_in_minutes == 0:
                     return job_summary, action_result.set_status(phantom.APP_SUCCESS)
-                if job_summary.get("State") not in ("done", "error"):
-                    self.debug_print("Job is in state '{}', waiting and retrying..".format(job_summary.get("State")))
-                    time.sleep(JOB_POLL_INTERVAL)
-                    continue
+                elif job_summary.get("State") == "done":
+                    return job_summary, action_result.set_status(phantom.APP_SUCCESS)
                 elif time.time() < start_time + timeout_in_minutes * 60:
                     time.sleep(JOB_POLL_INTERVAL)
                     continue
@@ -360,7 +358,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         self.save_progress("Connecting to endpoint")
 
-        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 30), "timeout")
+        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout", True)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
         job_id = params["job_id"]
@@ -390,7 +388,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         self.save_progress("Connecting to endpoint")
 
-        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 30), "timeout")
+        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout", True)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
@@ -422,7 +420,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         self.save_progress("Connecting to endpoint")
 
-        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 30), "timeout")
+        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout", True)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
         job_id = params.get("job_id")

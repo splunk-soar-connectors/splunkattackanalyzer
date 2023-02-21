@@ -120,7 +120,6 @@ DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 action\_result\.status | string |  |   success  failed 
 action\_result\.parameter\.job\_id | string |  `splunk attack analyzer job id`  |   63572265\-c5ae\-402f\-9fc1\-6c90547482ee 
 action\_result\.parameter\.timeout | numeric |  |   30 
-action\_result\.parameter\.wait | boolean |  |   True  False 
 action\_result\.data | string |  |  
 action\_result\.data\.\*\.DNSRequests | string |  |  
 action\_result\.data\.\*\.DNSRequests\.\*\.Engines | string |  |  
@@ -570,7 +569,6 @@ DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 action\_result\.status | string |  |   success  failed 
 action\_result\.parameter\.job\_id | string |  `splunk attack analyzer job id`  |   63572265\-c5ae\-402f\-9fc1\-6c90547482ee 
 action\_result\.parameter\.timeout | numeric |  |   30 
-action\_result\.parameter\.wait | boolean |  |   True  False 
 action\_result\.data | string |  |  
 action\_result\.data\.\*\.APIKey | string |  |  
 action\_result\.data\.\*\.APIKey\.\*\.ID | string |  |  
@@ -1032,7 +1030,6 @@ DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 action\_result\.status | string |  |   success  failed 
 action\_result\.parameter\.job\_id | string |  `splunk attack analyzer job id`  |   63572265\-c5ae\-402f\-9fc1\-6c90547482ee 
 action\_result\.parameter\.timeout | numeric |  |   30 
-action\_result\.parameter\.wait | boolean |  |   True  False 
 action\_result\.data | string |  |  
 action\_result\.data\.\*\.container | numeric |  |   2 
 action\_result\.data\.\*\.created\_via | string |  |   automation 
@@ -1066,7 +1063,6 @@ DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 action\_result\.status | string |  |   success  failed 
 action\_result\.parameter\.job\_id | string |  `splunk attack analyzer job id`  |   63572265\-c5ae\-402f\-9fc1\-6c90547482ee 
 action\_result\.parameter\.timeout | numeric |  |   30 
-action\_result\.parameter\.wait | boolean |  |   True  False 
 action\_result\.data | string |  |  
 action\_result\.data\.\*\.container | numeric |  |   2 
 action\_result\.data\.\*\.created\_via | string |  |   automation 

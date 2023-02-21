@@ -97,8 +97,9 @@
                 },
                 "timeout": {
                     "description": "Maximum time (in minutes) to wait for job to be complete",
+                    "verbose": "accepts integer value to wait for action to get finished, value 0 for immediate output and blank value to wait for process to get complete",
                     "data_type": "numeric",
-                    "default": 30,
+                    "default": 0,
                     "order": 2
                 }
             },
@@ -125,14 +126,6 @@
                     "data_type": "numeric",
                     "example_values": [
                         30
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.wait",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
                     ]
                 },
                 {
@@ -2632,8 +2625,9 @@
                 },
                 "timeout": {
                     "description": "Maximum time (in minutes) to wait for job to be complete",
+                    "verbose": "accepts integer value to wait for action to get finished, value 0 for immediate output and blank value to wait for process to get complete",
                     "data_type": "numeric",
-                    "default": 30,
+                    "default": 0,
                     "order": 2
                 }
             },
@@ -2660,14 +2654,6 @@
                     "data_type": "numeric",
                     "example_values": [
                         30
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.wait",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
                     ]
                 },
                 {
@@ -4865,8 +4851,9 @@
                 },
                 "timeout": {
                     "description": "Maximum time (in minutes) to wait for job to be complete",
+                    "verbose": "accepts integer value to wait for action to get finished, value 0 for immediate output and blank value to wait for process to get complete",
                     "data_type": "numeric",
-                    "default": 30,
+                    "default": 0,
                     "order": 2
                 }
             },
@@ -4893,14 +4880,6 @@
                     "data_type": "numeric",
                     "example_values": [
                         30
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.wait",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
                     ]
                 },
                 {
@@ -5030,8 +5009,9 @@
                 },
                 "timeout": {
                     "description": "Maximum time (in minutes) to wait for job to be complete",
+                    "verbose": "accepts integer value to wait for action to get finished, value 0 for immediate output and blank value to wait for process to get complete",
                     "data_type": "numeric",
-                    "default": 30,
+                    "default": 0,
                     "order": 2
                 }
             },
@@ -5058,14 +5038,6 @@
                     "data_type": "numeric",
                     "example_values": [
                         30
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.wait",
-                    "data_type": "boolean",
-                    "example_values": [
-                        true,
-                        false
                     ]
                 },
                 {
