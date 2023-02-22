@@ -32,7 +32,8 @@
             "description": "Start of time range stated in hours. If not specified, the default is past 24 hours"
         }
     },
-    "actions": [{
+    "actions": [
+        {
             "action": "test connectivity",
             "identifier": "test_connectivity",
             "description": "Validate the asset configuration for connectivity using supplied configuration",
@@ -102,7 +103,8 @@
                     "order": 2
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -2629,7 +2631,8 @@
                     "order": 2
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -3962,7 +3965,8 @@
                     "default": 10
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -4658,7 +4662,8 @@
                     "order": 0
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -4753,7 +4758,8 @@
                     "order": 0
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -4854,7 +4860,8 @@
                     "order": 2
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -5011,7 +5018,8 @@
                     "order": 2
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -5158,7 +5166,8 @@
         }
     ],
     "pip_dependencies": {
-        "wheel": [{
+        "wheel": [
+            {
                 "module": "certifi",
                 "input_file": "wheels/py3/certifi-2022.12.7-py3-none-any.whl"
             },

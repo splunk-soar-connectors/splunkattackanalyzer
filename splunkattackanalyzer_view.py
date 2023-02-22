@@ -31,7 +31,7 @@ def job_summary(provides, all_app_runs, context):
         for result in action_results:
 
             ctx_result = get_ctx_result(result)
-            if not ctx_result or not ctx_result["data"]:
+            if not ctx_result or not ctx_result.get("data"):
                 continue
 
             job = ctx_result["data"]
