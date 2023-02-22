@@ -140,9 +140,11 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         job_id = params["job_id"]
 
-        try:
+        job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
 
-            self._get_job_data(action_result, job_id, timeout_in_minutes)
+        try:
 
             job_fore = self._splunkattackanalyzer.get_job_normalized_forensics(job_id)
 
@@ -302,8 +304,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             if resource["Type"] == "URL":
                 container["artifacts"].append(
                     {
-                        "data": resource,
-                        "cef": {"requestURL": resource["Name"]},
+                        "cef": {"requestURL": resource["Name"], "data": resource},
                         "label": "url",
                         "name": resource["Name"],
                         "severity": severity,
@@ -313,12 +314,12 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             elif resource["Type"] == "file":
                 container["artifacts"].append(
                     {
-                        "data": resource,
                         "cef": {
                             "fileName": resource["Name"],
                             "fileHash": resource["FileMetadata"]["SHA256"],
                             "fileSize": resource["FileMetadata"]["Size"],
                             "fileType": resource["FileMetadata"]["MimeType"],
+                            "data": resource
                         },
                         "label": "file",
                         "name": resource["Name"],
