@@ -22,15 +22,15 @@
 <p>
     Manual polling:
     <ul>
-        <li>Maximum containers count should be considered</li>
-        <li>No check for ingesting duplicate data (state file should not be updated during manual polling)</li>
-        <li>Pagination</li>
+        <li>Maximum containers count parameter is used to limit the number of containers to be ingested while polling jobs</li>
+        <li>While performing manual polling, no check is provided to restrict duplicate data(state file is not updated during manual polling)</li>
+        <li>Pagination is implemented to get all the jobs for provided time window.</li>
     </ul>
 
     Schedule polling:
     <ul>
-        <li>In the first cycle, all the data(pagination) from the entered hour in "since" should be ingested and after the ingestion is the complete, state file should be updated with the "UpdatedAt" time of the latest/first record.</li>
-        <li>In the following cycles, all the records from the given hour in "since" should be ingested, and if while ingesting, the app finds "UpdatedAt" time of already ingested record, the ingestion should stop</li>
+        <li>In the first cycle, all the data from the entered hour in "since" gets ingested and after the ingestion is the completed, state file is updated with the "UpdatedAt" time of the latest/first record.</li>
+        <li>In the following cycles, all the records from the given hour in "since" gets ingested, and if while ingesting, the app finds "UpdatedAt" time of already ingested record, the ingestion stops</li>
     </ul>
 </p>
 <p>

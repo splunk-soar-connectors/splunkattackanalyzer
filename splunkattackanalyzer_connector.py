@@ -26,7 +26,7 @@ from phantom.vault import Vault
 from phsplunkattackanalyzer import SplunkAttackAnalyzer
 from splunkattackanalyzer_consts import *
 
-JOB_POLL_INTERVAL = 15
+JOB_POLL_INTERVAL = 30
 
 
 class RetVal(tuple):
@@ -144,6 +144,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
+        if job_summary["state"] == "inprogress":
+            return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_JOB_STATE.format("find job forensics"))
+
         try:
 
             job_fore = self._splunkattackanalyzer.get_job_normalized_forensics(job_id)
@@ -258,7 +261,11 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         if not manual_polling:
             self.debug_print("DEBUGGER: Starting polling now")
             checkpoint = self._state.get("UpdatedAt_Checkpoint", "0001-01-01T00:00:00.00Z")
-            datetime_checkpoint = datetime.strptime(checkpoint, "%Y-%m-%dT%H:%M:%S.%fZ")
+            try:
+                datetime_checkpoint = datetime.strptime(checkpoint, "%Y-%m-%dT%H:%M:%S.%fZ")
+            except:
+                self._state["Updated_Checkpoint"] = ""
+                return action_result.set_status(phantom.APP_ERROR, "Invalid checkpoint in state file")
 
         action_result = self.add_action_result(ActionResult(dict(params)))
         ret_val, limit = _validate_integer(action_result, params.get("container_count", 0), "container_count")
@@ -347,7 +354,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                     time.sleep(JOB_POLL_INTERVAL)
                     continue
                 else:
-                    return None, action_result.set_status(phantom.APP_ERROR, "Timed out waiting for job to be complete")
+                    return None, action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_TIMEOUT_ERROR)
             except Exception as e:
                 return None, action_result.set_status(phantom.APP_ERROR, "Exception occured: {}".format(str(e)))
 
@@ -400,6 +407,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
+        if job_summary["state"] == "inprogress":
+            return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_JOB_STATE.format("download pdf"))
+
         try:
             pdf_data = self._splunkattackanalyzer.download_job_pdf(job_id)
 
@@ -430,6 +440,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
+
+        if job_summary["state"] == "inprogress":
+            return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_JOB_STATE.format("download screenshots"))
 
         try:
             forensics = self._splunkattackanalyzer.get_job_normalized_forensics(job_id)

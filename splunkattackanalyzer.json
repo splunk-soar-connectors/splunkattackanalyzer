@@ -29,7 +29,7 @@
         "since": {
             "data_type": "numeric",
             "order": 1,
-            "description": "Start of time range stated in hours. If not specified, the default is past 3 days"
+            "description": "Start of time range stated in hours. If not specified, the default is past 24 hours"
         }
     },
     "actions": [{
@@ -97,9 +97,8 @@
                 },
                 "timeout": {
                     "description": "Maximum time (in minutes) to wait for job to be complete",
-                    "verbose": "accepts integer value to wait for action to get finished, value 0 for immediate output and blank value to wait for process to get complete",
+                    "verbose": "Accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output",
                     "data_type": "numeric",
-                    "default": 0,
                     "order": 2
                 }
             },
@@ -2625,9 +2624,8 @@
                 },
                 "timeout": {
                     "description": "Maximum time (in minutes) to wait for job to be complete",
-                    "verbose": "accepts integer value to wait for action to get finished, value 0 for immediate output and blank value to wait for process to get complete",
+                    "verbose": "Accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output",
                     "data_type": "numeric",
-                    "default": 0,
                     "order": 2
                 }
             },
@@ -4851,9 +4849,8 @@
                 },
                 "timeout": {
                     "description": "Maximum time (in minutes) to wait for job to be complete",
-                    "verbose": "accepts integer value to wait for action to get finished, value 0 for immediate output and blank value to wait for process to get complete",
+                    "verbose": "Accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output",
                     "data_type": "numeric",
-                    "default": 0,
                     "order": 2
                 }
             },
@@ -5009,9 +5006,8 @@
                 },
                 "timeout": {
                     "description": "Maximum time (in minutes) to wait for job to be complete",
-                    "verbose": "accepts integer value to wait for action to get finished, value 0 for immediate output and blank value to wait for process to get complete",
+                    "verbose": "Accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output",
                     "data_type": "numeric",
-                    "default": 0,
                     "order": 2
                 }
             },
