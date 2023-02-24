@@ -15,23 +15,26 @@
 
 <h3>
     The Splunk Attack Analyzer SOAR app can be used to connect with the
-    <a target="_blank" href='https://www.google.com/url?q=https://www.twinwave.io/&amp;sa=D&amp;source=editors&amp;ust=1644536802576291&amp;usg=AOvVaw1QbcnelmQFirXDHIRabB07'>
+    <a target="_blank" href='https://app.twinwave.io/'>
         Splunk Attack Analyzer analysis platform
     </a>
 </h3>
 <p>
-    Manual polling:
-    <ul>
-        <li>Maximum containers count parameter is used to limit the number of containers to be ingested while polling jobs</li>
-        <li>While performing manual polling, no check is provided to restrict duplicate data(state file is not updated during manual polling)</li>
-        <li>Pagination is implemented to get all the jobs for provided time window.</li>
-    </ul>
+    <ul>Common points for both Manual and Scheduled | Interval polling:</ul>
+    <li>The on poll action fetches and ingests the done/completed jobs in the form of artifacts and containers.</li>
+    <li>One container will be created for each job and the artifacts will have information about the resources present in the particular job, hence for every resource present, one artifact will be created.</li>
+    <li>In case of duplicate data, containers would not be created again.</li>
 
-    Schedule polling:
-    <ul>
-        <li>In the first cycle, all the data from the entered hour in "since" gets ingested and after the ingestion is the completed, state file is updated with the "UpdatedAt" time of the latest/first record.</li>
-        <li>In the following cycles, all the records from the given hour in "since" gets ingested, and if while ingesting, the app finds "UpdatedAt" time of already ingested record, the ingestion stops</li>
-    </ul>
+    <ul>Manual Polling:</ul>
+    <li>During manual polling, the app starts ingestion from the time specified in the since configuration parameter. </li>
+    <li>If 2 hours is specified in the since parameter, for every cycle jobs of the last 2 hours will be fetched and ingested. If no value is specified, by default jobs of the last 24 hours will be ingested.</li>
+    <li>The app will fetch the number of jobs based on the value provided in the Maximum containers(container_count) for manual polling</li>
+    <li>For manual polling, the time of the last ingested job will not be stored in the state file, and for every cycle all the jobs from the time mentioned in the since parameter will be fetched.</li>
+
+    <ul>Schedule | Interval Polling:</ul>
+    <li>For the first run of scheduled | interval polling, the app starts ingestion from the time specified in the since configuration parameter.</li>
+    <li>If 2 hours is specified in the since parameter, for the first run all the jobs of the last 2 hours will be fetched, and if no value is specified, by default jobs of the last 24 hours will be ingested for the first run.</li>
+    <li>After the completion of every run, the 'UpdatedAt' time of the latest job will be stored in the state file against the key "UpdatedAt_Checkpoint" and for the next run, that time will be considered to fetch the data. Hence from the second run onwards, the jobs will be fetched from the time stored in the state file instead of the value given in the since parameter.</li>
 </p>
 <p>
     The following actions are supported by the app:

@@ -13,11 +13,14 @@
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 
+import json
+import sys
 # Phantom App imports
 import time
 from datetime import datetime
 
 import phantom.app as phantom
+import requests
 from phantom import vault
 from phantom.action_result import ActionResult
 from phantom.base_connector import BaseConnector
@@ -25,8 +28,6 @@ from phantom.vault import Vault
 
 from phsplunkattackanalyzer import SplunkAttackAnalyzer
 from splunkattackanalyzer_consts import *
-
-JOB_POLL_INTERVAL = 30
 
 
 class RetVal(tuple):
@@ -36,25 +37,24 @@ class RetVal(tuple):
 
 
 def _make_resource_tree(resources):
-    root = [r for r in resources if not r["ParentID"]][0]
+    root = [root_resource for root_resource in resources if not root_resource["ParentID"]][0]
 
-    def _get_children(r, resources):
-        r["Children"] = [c for c in resources if c["ParentID"] == r["ID"]]
-        for c in r["Children"]:
-            _get_children(c, resources)
+    def _get_children(root_resource, resources):
+        root_resource["Children"] = [child_resource for child_resource in resources if child_resource["ParentID"] == root_resource["ID"]]
+        for child_resource in root_resource["Children"]:
+            _get_children(child_resource, resources)
 
     _get_children(root, resources)
 
     return root
 
 
-def _validate_integer(action_result, parameter, key, allow_zero=False):
+def _validate_integer(action_result, parameter, key):
     """
     Validate an integer.
     :param action_result: Action result or BaseConnector object
     :param parameter: input parameter
     :param key: input parameter message key
-    :allow_zero: whether zero should be considered as valid value or not
     :return: status phantom.APP_ERROR/phantom.APP_SUCCESS, integer value of the parameter or None in case of failure
     """
     if parameter is not None:
@@ -67,9 +67,7 @@ def _validate_integer(action_result, parameter, key, allow_zero=False):
             return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_INTEGER_MESSAGE.format(key)), None
 
         if parameter < 0:
-            return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_INTEGER_MESSAGE.format(key)), None
-        if not allow_zero and parameter == 0:
-            return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_INTEGER_MESSAGE.format(key)), None
+            return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_NON_NEGATIVE_INTEGER_MESSAGE.format(key)), None
 
     return phantom.APP_SUCCESS, parameter
 
@@ -86,10 +84,14 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         # Load the state in initialize, use it to store data that needs to be accessed across actions
         self._state = self.load_state()
+        if not isinstance(self._state, dict):
+            self.debug_print("State file is corrupted, resetting the file")
+            self.save_progresss("State file is corrupted, resetting the file")
+            self._state = {"app_version": self.get_app_json().get("app_version")}
 
         # Get the asset config from Phantom
         config = self.get_config()
-        ret_val, config["since"] = _validate_integer(self, config.get("since"), "since")
+        ret_val, config["since"] = _validate_integer(self, config.get("since", 24), "since")
         if phantom.is_fail(ret_val):
             return self.get_status()
 
@@ -97,6 +99,27 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         self._splunkattackanalyzer = SplunkAttackAnalyzer(config)
 
         return phantom.APP_SUCCESS
+
+    def _get_error_message_from_exception(self, e):
+        """ This method is used to get appropriate error message from the exception.
+        :param e: Exception object
+        :return: error message
+        """
+
+        error_code = SPLUNK_ATTACK_ANALYZER_ERR_CODE_UNAVAILABLE
+        error_msg = SPLUNK_ATTACK_ANALYZER_ERR_MSG_UNAVAILABLE
+
+        try:
+            if e.args:
+                if len(e.args) > 1:
+                    error_code = e.args[0]
+                    error_msg = str(e)
+                elif len(e.args) == 1:
+                    error_msg = e.args[0]
+        except:
+            pass
+
+        return "Error Code: {0}. Error Message: {1}".format(error_code, error_msg)
 
     def _add_to_vault(self, data, filename):
         # this temp directory uses "V" since this function is from the CLASS instance not the same as the "v" vault instance
@@ -118,7 +141,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         except Exception as e:
             # the call to the 3rd party device or service failed
             # action result should contain all the error details so just return from here
-            self.save_progress(str(e))
+            error_msg = self._get_error_message_from_exception(e)
+            self.debug_print(error_msg)
             self.save_progress("Test Connectivity Failed")
             return action_result.set_status(phantom.APP_ERROR)
 
@@ -132,9 +156,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
-        self.save_progress("Connecting to endpoint")
-
-        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout", True)
+        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout")
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
@@ -144,7 +166,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
-        if job_summary["state"] == "inprogress":
+        if job_summary["State"] == "inprogress":
             return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_JOB_STATE.format("find job forensics"))
 
         try:
@@ -152,7 +174,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             job_fore = self._splunkattackanalyzer.get_job_normalized_forensics(job_id)
 
         except Exception as e:
-            self.save_progress(str(e))
+            self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
             return action_result.set_status(phantom.APP_ERROR, "Unable to retrieve forensics")
 
         action_result.add_data(job_fore)
@@ -164,17 +186,16 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
-        self.save_progress("Connecting to endpoint")
-
         submit_data = {}
 
         try:
-            file = params.get("file")
-            success, message, info = vault.vault_info(vault_id=file)
+            file_id = params.get("file")
+            success, message, info = vault.vault_info(vault_id=file_id)
             file_path = info[0]["path"]
             file_name = info[0]["name"]
             f = open(file_path, "rb")
             file_data = f.read()
+            f.close()
             submit_data = self._splunkattackanalyzer.submit_file(file_name, file_data)
         except Exception as err:
             self.save_progress(str(err))
@@ -191,15 +212,13 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
-        self.save_progress("Connecting to endpoint")
-
         submit_data = {}
 
         try:
             url = params.get("url")
             submit_data = self._splunkattackanalyzer.submit_url(url)
         except Exception as e:
-            self.save_progress(str(e))
+            self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
             return action_result.set_status(phantom.APP_ERROR, "Unable to submit url")
 
         submit_data["AppURL"] = "https://app.twinwave.io/job/{}".format(submit_data.get("JobID"))
@@ -207,49 +226,27 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         self.debug_print("results", dump_object=submit_data)
         return action_result.set_status(phantom.APP_SUCCESS, "Submitted URL")
 
-    def _handle_get_engines(self, params):
-
-        action_result = self.add_action_result(ActionResult(dict(params)))
-
-        self.save_progress("Connecting to endpoint")
-
-        try:
-            response = self._splunkattackanalyzer.get_engines()
-
-        except Exception as e:
-            self.save_progress(str(e))
-            return action_result.set_status(phantom.APP_ERROR, "Unable to get engines")
-
-        action_result.add_data(response)
-        self.save_progress("Submitted URL")
-        return action_result.set_status(phantom.APP_SUCCESS)
-
     def _handle_splunk_attack_analyzer_list_recent_jobs(self, params):
 
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
-        ret_val, limit = _validate_integer(action_result, params.get("limit"), "limit")
+        ret_val, limit = _validate_integer(action_result, params.get("limit", 10), "limit")
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
-        self.save_progress("Connecting to endpoint")
-        # save_state load_state to get last run job date to reference
-        # after save the run now as last run
-        # parameter uses an integer from how many days back you want
-        # parameter count uses start at 100 if applicable if not start at 0
-        # paremter pull for "DONE" jobs
         try:
-            list = self._splunkattackanalyzer.get_recent_jobs(num_jobs=limit)
+            job_list = self._splunkattackanalyzer.get_recent_jobs(num_jobs=limit)
 
             action_result.append_to_message("Gathered recent jobs")
-            action_result.update_summary({"job_count": len(list)})
+            action_result.update_summary({"job_count": len(job_list)})
         except Exception as e:
-            self.save_progress(str(e))
+            self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
             return action_result.set_status(phantom.APP_ERROR, "Unable to get jobs")
 
-        action_result.add_data(list)
+        for data in job_list:
+            action_result.add_data(data)
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_on_poll(self, params):
@@ -258,34 +255,35 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         manual_polling = self.is_poll_now()
 
+        action_result = self.add_action_result(ActionResult(dict(params)))
+        datetime_checkpoint = None
+
         if not manual_polling:
             self.debug_print("DEBUGGER: Starting polling now")
             checkpoint = self._state.get("UpdatedAt_Checkpoint", "0001-01-01T00:00:00.00Z")
             try:
                 datetime_checkpoint = datetime.strptime(checkpoint, "%Y-%m-%dT%H:%M:%S.%fZ")
             except:
-                self._state["Updated_Checkpoint"] = ""
-                return action_result.set_status(phantom.APP_ERROR, "Invalid checkpoint in state file")
+                del self._state["UpdatedAt_Checkpoint"]
+                self.debug_print("State file is corrupted, resetting the file")
+                self.save_progresss("State file is corrupted, resetting the file")
+                self._state = {"app_version": self.get_app_json().get("app_version")}
+                self._handle_on_poll(params)
 
-        action_result = self.add_action_result(ActionResult(dict(params)))
         ret_val, limit = _validate_integer(action_result, params.get("container_count", 0), "container_count")
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         try:
-            payload = self._splunkattackanalyzer.poll_for_done_jobs(limit)
+            payload = self._splunkattackanalyzer.poll_for_done_jobs(limit, datetime_checkpoint)
         except Exception as e:
-            self.save_progress(str(e))
+            self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
             return action_result.set_status(phantom.APP_ERROR, "Unable to get jobs")
-        jobs = payload
-        if jobs:
-            for job in jobs:
-                if manual_polling:
-                    self.add_to_container(job)
-                elif datetime.strptime(job["UpdatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ") >= datetime_checkpoint:
-                    self.add_to_container(job)
+        if payload:
+            for job in payload:
+                self.add_to_container(job)
             if not manual_polling:
-                self._state["UpdatedAt_Checkpoint"] = jobs[0].get("UpdatedAt")
+                self._state["UpdatedAt_Checkpoint"] = payload[0].get("UpdatedAt")
                 self.save_state(self._state)
         else:
             self.debug_print("payload_empty")
@@ -346,7 +344,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             try:
                 job_summary = self._splunkattackanalyzer.get_job(job_id)
 
-                if timeout_in_minutes == 0:
+                if not timeout_in_minutes:
                     return job_summary, action_result.set_status(phantom.APP_SUCCESS)
                 elif job_summary.get("State") == "done":
                     return job_summary, action_result.set_status(phantom.APP_SUCCESS)
@@ -356,7 +354,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                 else:
                     return None, action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_TIMEOUT_ERROR)
             except Exception as e:
-                return None, action_result.set_status(phantom.APP_ERROR, "Exception occured: {}".format(str(e)))
+                err_msg = self._get_error_message_from_exception(e)
+                return None, action_result.set_status(phantom.APP_ERROR, "Exception occured: {}".format(err_msg))
 
     def _handle_splunk_attack_analyzer_get_job_summary(self, params):
 
@@ -364,25 +363,23 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
-        self.save_progress("Connecting to endpoint")
-
-        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout", True)
+        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout")
         if phantom.is_fail(ret_val):
             return action_result.get_status()
         job_id = params["job_id"]
 
         self.debug_print(
-            "Getting summary for job ID: {}, timeout: {}".format(params.get("job_id"), params.get("timeout"))
+            "Getting summary for job ID: {}, timeout: {}".format(job_id, timeout_in_minutes)
         )
 
         job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
-        job_summary["ResourceTree"] = _make_resource_tree(job_summary["Resources"])
+        job_summary["ResourceTree"] = _make_resource_tree(job_summary.get("Resources"))
 
         action_result.add_data(job_summary)
-        action_result.update_summary({"JobID": job_id, "Score": job_summary.get("DisplayScore")})
+        action_result.update_summary({"Job ID": job_id, "Score": job_summary.get("DisplayScore")})
 
         self.save_progress("Job Summary Retrieved")
 
@@ -394,9 +391,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
-        self.save_progress("Connecting to endpoint")
-
-        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout", True)
+        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout")
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
@@ -407,7 +402,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
-        if job_summary["state"] == "inprogress":
+        if job_summary["State"] == "inprogress":
             return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_JOB_STATE.format("download pdf"))
 
         try:
@@ -418,7 +413,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             action_result.add_data(vault_detail)
             action_result.append_to_message("Attached PDF report")
         except Exception as e:
-            self.save_progress(str(e))
+            self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
             return action_result.set_status(phantom.APP_ERROR, "Unable to get PDF report")
 
         return action_result.set_status(phantom.APP_SUCCESS, "Successfully attached PDF report")
@@ -429,9 +424,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
-        self.save_progress("Connecting to endpoint")
-
-        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout", True)
+        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout")
         if phantom.is_fail(ret_val):
             return action_result.get_status()
         job_id = params.get("job_id")
@@ -441,7 +434,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
-        if job_summary["state"] == "inprogress":
+        if job_summary["State"] == "inprogress":
             return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_JOB_STATE.format("download screenshots"))
 
         try:
@@ -455,12 +448,12 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                 vault_detail["file_name"] = f"Splunk Attack Analyzer screenshot {job_id} #{i}.png"
                 action_result.add_data(vault_detail)
 
-            screenshot_count = len(forensics.get("Screenshots", []))
+            screenshot_count = i + 1
 
             action_result.append_to_message(f"Attached {screenshot_count} screenshots")
             action_result.update_summary({"screenshot_count": screenshot_count})
         except Exception as e:
-            self.save_progress(str(e))
+            self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
             return action_result.set_status(phantom.APP_ERROR, "Unable to download screenshots")
 
         return action_result.set_status(phantom.APP_SUCCESS)
@@ -498,3 +491,72 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         # Save the state, this data is saved accross actions and app upgrades
         self.save_state(self._state)
         return phantom.APP_SUCCESS
+
+
+def main():
+    import argparse
+
+    argparser = argparse.ArgumentParser()
+
+    argparser.add_argument('input_test_json', help='Input Test JSON file')
+    argparser.add_argument('-u', '--username', help='username', required=False)
+    argparser.add_argument('-p', '--password', help='password', required=False)
+    argparser.add_argument('-v', '--verify', action='store_true', help='verify', required=False, default=False)
+
+    args = argparser.parse_args()
+    session_id = None
+    verify = args.verify
+
+    username = args.username
+    password = args.password
+
+    if username is not None and password is None:
+
+        # User specified a username but not a password, so ask
+        import getpass
+        password = getpass.getpass("Password: ")
+
+    if username and password:
+        try:
+            login_url = SplunkAttackAnalyzerConnector._get_phantom_base_url() + '/login'
+
+            print("Accessing the Login page")
+            r = requests.get(login_url, verify=verify, timeout=30)
+            csrftoken = r.cookies['csrftoken']
+
+            data = dict()
+            data['username'] = username
+            data['password'] = password
+            data['csrfmiddlewaretoken'] = csrftoken
+
+            headers = dict()
+            headers['Cookie'] = 'csrftoken=' + csrftoken
+            headers['Referer'] = login_url
+
+            print("Logging into Platform to get the session id")
+            r2 = requests.post(login_url, verify=verify, data=data, headers=headers, timeout=30)
+            session_id = r2.cookies['sessionid']
+        except Exception as e:
+            print("Unable to get session id from the platform. Error: " + str(e))
+            sys.exit(1)
+
+    with open(args.input_test_json) as f:
+        in_json = f.read()
+        in_json = json.loads(in_json)
+        print(json.dumps(in_json, indent=4))
+
+        connector = SplunkAttackAnalyzerConnector()
+        connector.print_progress_message = True
+
+        if session_id is not None:
+            in_json['user_session_token'] = session_id
+            connector._set_csrf_info(csrftoken, headers['Referer'])
+
+        ret_val = connector._handle_action(json.dumps(in_json), None)
+        print(json.dumps(json.loads(ret_val), indent=4))
+
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()

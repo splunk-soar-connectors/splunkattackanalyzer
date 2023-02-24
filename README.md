@@ -6,9 +6,9 @@ Connector Version: 1\.0\.0
 Product Vendor: Splunk  
 Product Name: Splunk Attack Analyzer  
 Product Version Supported (regex): "\.\*"  
-Minimum Product Version: 5\.4\.0  
+Minimum Product Version: 5\.5\.0  
 
-A threat analysis platform to reduce the friction of repetitive manual tasks typically associated with investigating threats
+This connector integrates with the Splunk Attack Analyzer platform to reduce the friction of repetitive manual tasks typically associated with investigating threats
 
 [comment]: # " File: README.md"
 [comment]: # ""
@@ -24,24 +24,52 @@ A threat analysis platform to reduce the friction of repetitive manual tasks typ
 [comment]: # "  the License is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,"
 [comment]: # "  either express or implied. See the License for   and limitations under the License."
 [comment]: # ""
-### The Splunk Attack Analyzer SOAR app can be used to connect with the <a
-href="https://www.google.com/url?q=https://www.twinwave.io/&amp;sa=D&amp;source=editors&amp;ust=1644536802576291&amp;usg=AOvVaw1QbcnelmQFirXDHIRabB07"
-target="_blank">Splunk Attack Analyzer analysis platform</a>
+### The Splunk Attack Analyzer SOAR app can be used to connect with the <a href="https://app.twinwave.io/" target="_blank">Splunk Attack Analyzer analysis platform</a>
 
-Manual polling:
+<div style="margin-left: 2em">
 
-- Maximum containers count should be considered
-- No check for ingesting duplicate data (state file should not be updated during manual polling)
-- Pagination
+Common points for both Manual and Scheduled \| Interval polling:
 
-Schedule polling:
 
-- In the first cycle, all the data(pagination) from the entered hour in "since" should be ingested
-  and after the ingestion is the complete, state file should be updated with the "UpdatedAt" time of
-  the latest/first record.
-- In the following cycles, all the records from the given hour in "since" should be ingested, and if
-  while ingesting, the app finds "UpdatedAt" time of already ingested record, the ingestion should
-  stop
+
+- The on poll action fetches and ingests the done/completed jobs in the form of artifacts and
+  containers.
+- One container will be created for each job and the artifacts will have information about the
+  resources present in the particular job, hence for every resource present, one artifact will be
+  created.
+- In case of duplicate data, containers would not be created again.
+
+<div style="margin-left: 2em">
+
+Manual Polling:
+
+
+
+- During manual polling, the app starts ingestion from the time specified in the since configuration
+  parameter.
+- If 2 hours is specified in the since parameter, for every cycle jobs of the last 2 hours will be
+  fetched and ingested. If no value is specified, by default jobs of the last 24 hours will be
+  ingested.
+- The app will fetch the number of jobs based on the value provided in the Maximum
+  containers(container_count) for manual polling
+- For manual polling, the time of the last ingested job will not be stored in the state file, and
+  for every cycle all the jobs from the time mentioned in the since parameter will be fetched.
+
+<div style="margin-left: 2em">
+
+Schedule \| Interval Polling:
+
+
+
+- For the first run of scheduled \| interval polling, the app starts ingestion from the time
+  specified in the since configuration parameter.
+- If 2 hours is specified in the since parameter, for the first run all the jobs of the last 2 hours
+  will be fetched, and if no value is specified, by default jobs of the last 24 hours will be
+  ingested for the first run.
+- After the completion of every run, the 'UpdatedAt' time of the latest job will be stored in the
+  state file against the key "UpdatedAt_Checkpoint" and for the next run, that time will be
+  considered to fetch the data. Hence from the second run onwards, the jobs will be fetched from the
+  time stored in the state file instead of the value given in the since parameter.
 
 The following actions are supported by the app:
 
@@ -59,60 +87,104 @@ The below configuration variables are required for this Connector to operate.  T
 VARIABLE | REQUIRED | TYPE | DESCRIPTION
 -------- | -------- | ---- | -----------
 **api\_token** |  required  | password | API token from the app
-**since** |  optional  | numeric | Start of time range stated in hours\. If not specified, the default is past 3 days
+**since** |  optional  | numeric | Start of time range stated in hours\. If not specified, the default is past 24 hours
 
 ### Supported Actions  
-[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity using supplied configuration  
-[on poll](#action-on-poll) - Callback action for the on\_poll ingest functionality  
+[get job screenshots](#action-get-job-screenshots) - Get screenshots for the specified job and store them in the vault  
+[get pdf report](#action-get-pdf-report) - Get the PDF report for a completed job  
 [get job forensics](#action-get-job-forensics) - Get the consolidated forensics for a completed job  
-[get job summary](#action-get-job-summary) - Get a job summary  
+[get job summary](#action-get-job-summary) - Get a job summary for a submitted job  
 [list recent jobs](#action-list-recent-jobs) - Get a list of recent jobs  
 [detonate file](#action-detonate-file) - Submit File for Scanning  
 [detonate url](#action-detonate-url) - Submit New URL for Scanning  
-[get pdf report](#action-get-pdf-report) - Get the PDF report for a completed job  
-[get job screenshots](#action-get-job-screenshots) - Get screenshots for the specified job and store them in the vault  
+[on poll](#action-on-poll) - Callback action for the on\_poll ingest functionality  
+[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity using supplied configuration  
 
-## action: 'test connectivity'
-Validate the asset configuration for connectivity using supplied configuration
+## action: 'get job screenshots'
+Get screenshots for the specified job and store them in the vault
 
-Type: **test**  
+Type: **investigate**  
 Read only: **True**
 
-#### Action Parameters
-No parameters are required for this action
-
-#### Action Output
-No Output  
-
-## action: 'on poll'
-Callback action for the on\_poll ingest functionality
-
-Type: **ingest**  
-Read only: **False**
+Timeout parameter accepts integer value in minutes to wait for action to get finished \(by default the value is 0\), value 0 is for immediate output
 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**container\_id** |  optional  | Parameter ignored in this app | string | 
-**start\_time** |  optional  | Parameter ignored in this app | numeric | 
-**end\_time** |  optional  | Parameter ignored in this app | numeric | 
-**container\_count** |  optional  | Number of jobs to ingest | numeric | 
-**artifact\_count** |  optional  | Parameter ignored in this app | numeric | 
+**job\_id** |  required  | Job id of the job summary you want to download the PDF for | string |  `splunk attack analyzer job id` 
+**timeout** |  optional  | Maximum time \(in minutes\) to wait for job to be completed | numeric | 
 
 #### Action Output
-No Output  
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action\_result\.status | string |  |   success  failed 
+action\_result\.parameter\.job\_id | string |  `splunk attack analyzer job id`  |   63572265\-c5ae\-402f\-9fc1\-6c90547482ee 
+action\_result\.parameter\.timeout | numeric |  |   30 
+action\_result\.data | string |  |  
+action\_result\.data\.\*\.container | numeric |  |   2 
+action\_result\.data\.\*\.created\_via | string |  |   automation 
+action\_result\.data\.\*\.file\_name | string |  |   6b95b196e05b2d6d5a75fa0241d903350a7b65d0 
+action\_result\.data\.\*\.hash | string |  |   de7403877259141c0217d19dc2f7931c913 
+action\_result\.data\.\*\.id | numeric |  |   7 
+action\_result\.data\.\*\.message | string |  |   success 
+action\_result\.data\.\*\.screenshot\_count | numeric |  |   2 
+action\_result\.data\.\*\.size | numeric |  |   470679 
+action\_result\.data\.\*\.succeeded | boolean |  |   True  False 
+action\_result\.data\.\*\.vault\_id | string |  `vault id`  |   de740387131d77259141c0217d19dc2f7931c913 
+action\_result\.summary | string |  |  
+action\_result\.summary\.screenshot\_count | numeric |  |   2 
+action\_result\.message | string |  |   Screenshot count\: 2 
+summary\.total\_objects | numeric |  |   2 
+summary\.total\_objects\_successful | numeric |  |   2   
+
+## action: 'get pdf report'
+Get the PDF report for a completed job
+
+Type: **investigate**  
+Read only: **True**
+
+Timeout parameter accepts integer value in minutes to wait for action to get finished \(by default the value is 0\), value 0 is for immediate output
+
+#### Action Parameters
+PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
+--------- | -------- | ----------- | ---- | --------
+**job\_id** |  required  | Job id of the job summary you want to download the PDF for | string |  `splunk attack analyzer job id` 
+**timeout** |  optional  | Maximum time \(in minutes\) to wait for job to be completed | numeric | 
+
+#### Action Output
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action\_result\.status | string |  |   success  failed 
+action\_result\.parameter\.job\_id | string |  `splunk attack analyzer job id`  |   63572265\-c5ae\-402f\-9fc1\-6c90547482ee 
+action\_result\.parameter\.timeout | numeric |  |   30 
+action\_result\.data | string |  |  
+action\_result\.data\.\*\.container | numeric |  |   2 
+action\_result\.data\.\*\.created\_via | string |  |   automation 
+action\_result\.data\.\*\.file\_name | string |  |   6b95b196e0d6d5a75fa0241d903350a7b65d0 
+action\_result\.data\.\*\.hash | string |  |   6b95b196e05b2d6d5a75fa0241d903350a7b65d0 
+action\_result\.data\.\*\.id | numeric |  |   6 
+action\_result\.data\.\*\.message | string |  |   success 
+action\_result\.data\.\*\.size | numeric |  |   1187161 
+action\_result\.data\.\*\.succeeded | boolean |  |   True  False 
+action\_result\.data\.\*\.vault\_id | string |  `vault id`  |   6b95b196e05b2d6d5a75fa0241d903350a7b65d0 
+action\_result\.summary | string |  |  
+action\_result\.message | string |  |   Successfully attached PDF report 
+summary\.total\_objects | numeric |  |   2 
+summary\.total\_objects\_successful | numeric |  |   2   
 
 ## action: 'get job forensics'
 Get the consolidated forensics for a completed job
 
 Type: **investigate**  
-Read only: **False**
+Read only: **True**
+
+Timeout parameter accepts integer value in minutes to wait for action to get finished \(by default the value is 0\), value 0 is for immediate output
 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **job\_id** |  required  | Job id of the forensics you want pulled | string |  `splunk attack analyzer job id` 
-**timeout** |  optional  | Maximum time \(in minutes\) to wait for job to be complete | numeric | 
+**timeout** |  optional  | Maximum time \(in minutes\) to wait for job to be completed | numeric | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
@@ -552,16 +624,18 @@ summary\.total\_objects | numeric |  |   1
 summary\.total\_objects\_successful | numeric |  |   1   
 
 ## action: 'get job summary'
-Get a job summary
+Get a job summary for a submitted job
 
 Type: **investigate**  
-Read only: **False**
+Read only: **True**
+
+Timeout parameter accepts integer value in minutes to wait for action to get finished \(by default the value is 0\), value 0 is for immediate output
 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **job\_id** |  required  | Job id of the job summary you want to fetch | string |  `splunk attack analyzer job id` 
-**timeout** |  optional  | Maximum time \(in minutes\) to wait for job to be complete | numeric | 
+**timeout** |  optional  | Maximum time \(in minutes\) to wait for job to be completed | numeric | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
@@ -818,8 +892,8 @@ summary\.total\_objects\_successful | numeric |  |   2
 ## action: 'list recent jobs'
 Get a list of recent jobs
 
-Type: **generic**  
-Read only: **False**
+Type: **investigate**  
+Read only: **True**
 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
@@ -965,7 +1039,7 @@ summary\.total\_objects\_successful | numeric |  |   2
 ## action: 'detonate file'
 Submit File for Scanning
 
-Type: **investigate**  
+Type: **generic**  
 Read only: **False**
 
 #### Action Parameters
@@ -990,7 +1064,7 @@ summary\.total\_objects\_successful | numeric |  |   2
 ## action: 'detonate url'
 Submit New URL for Scanning
 
-Type: **investigate**  
+Type: **generic**  
 Read only: **False**
 
 #### Action Parameters
@@ -1012,70 +1086,32 @@ action\_result\.message | string |  |   Submitted URL
 summary\.total\_objects | numeric |  |   2 
 summary\.total\_objects\_successful | numeric |  |   2   
 
-## action: 'get pdf report'
-Get the PDF report for a completed job
+## action: 'on poll'
+Callback action for the on\_poll ingest functionality
 
-Type: **investigate**  
-Read only: **False**
-
-#### Action Parameters
-PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
---------- | -------- | ----------- | ---- | --------
-**job\_id** |  required  | Job id of the job summary you want to download the PDF for | string |  `splunk attack analyzer job id` 
-**timeout** |  optional  | Maximum time \(in minutes\) to wait for job to be complete | numeric | 
-
-#### Action Output
-DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
---------- | ---- | -------- | --------------
-action\_result\.status | string |  |   success  failed 
-action\_result\.parameter\.job\_id | string |  `splunk attack analyzer job id`  |   63572265\-c5ae\-402f\-9fc1\-6c90547482ee 
-action\_result\.parameter\.timeout | numeric |  |   30 
-action\_result\.data | string |  |  
-action\_result\.data\.\*\.container | numeric |  |   2 
-action\_result\.data\.\*\.created\_via | string |  |   automation 
-action\_result\.data\.\*\.file\_name | string |  |   6b95b196e0d6d5a75fa0241d903350a7b65d0 
-action\_result\.data\.\*\.hash | string |  |   6b95b196e05b2d6d5a75fa0241d903350a7b65d0 
-action\_result\.data\.\*\.id | numeric |  |   6 
-action\_result\.data\.\*\.message | string |  |   success 
-action\_result\.data\.\*\.size | numeric |  |   1187161 
-action\_result\.data\.\*\.succeeded | boolean |  |   True  False 
-action\_result\.data\.\*\.vault\_id | string |  `vault id`  |   6b95b196e05b2d6d5a75fa0241d903350a7b65d0 
-action\_result\.summary | string |  |  
-action\_result\.message | string |  |   Successfully attached PDF report 
-summary\.total\_objects | numeric |  |   2 
-summary\.total\_objects\_successful | numeric |  |   2   
-
-## action: 'get job screenshots'
-Get screenshots for the specified job and store them in the vault
-
-Type: **investigate**  
-Read only: **False**
+Type: **ingest**  
+Read only: **True**
 
 #### Action Parameters
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**job\_id** |  required  | Job id of the job summary you want to download the PDF for | string |  `splunk attack analyzer job id` 
-**timeout** |  optional  | Maximum time \(in minutes\) to wait for job to be complete | numeric | 
+**container\_id** |  optional  | Parameter ignored in this app | string | 
+**start\_time** |  optional  | Parameter ignored in this app | numeric | 
+**end\_time** |  optional  | Parameter ignored in this app | numeric | 
+**container\_count** |  optional  | Number of jobs to ingest | numeric | 
+**artifact\_count** |  optional  | Parameter ignored in this app | numeric | 
 
 #### Action Output
-DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
---------- | ---- | -------- | --------------
-action\_result\.status | string |  |   success  failed 
-action\_result\.parameter\.job\_id | string |  `splunk attack analyzer job id`  |   63572265\-c5ae\-402f\-9fc1\-6c90547482ee 
-action\_result\.parameter\.timeout | numeric |  |   30 
-action\_result\.data | string |  |  
-action\_result\.data\.\*\.container | numeric |  |   2 
-action\_result\.data\.\*\.created\_via | string |  |   automation 
-action\_result\.data\.\*\.file\_name | string |  |   6b95b196e05b2d6d5a75fa0241d903350a7b65d0 
-action\_result\.data\.\*\.hash | string |  |   de7403877259141c0217d19dc2f7931c913 
-action\_result\.data\.\*\.id | numeric |  |   7 
-action\_result\.data\.\*\.message | string |  |   success 
-action\_result\.data\.\*\.screenshot\_count | numeric |  |   2 
-action\_result\.data\.\*\.size | numeric |  |   470679 
-action\_result\.data\.\*\.succeeded | boolean |  |   True  False 
-action\_result\.data\.\*\.vault\_id | string |  `vault id`  |   de740387131d77259141c0217d19dc2f7931c913 
-action\_result\.summary | string |  |  
-action\_result\.summary\.screenshot\_count | numeric |  |   2 
-action\_result\.message | string |  |   Screenshot count\: 2 
-summary\.total\_objects | numeric |  |   2 
-summary\.total\_objects\_successful | numeric |  |   2 
+No Output  
+
+## action: 'test connectivity'
+Validate the asset configuration for connectivity using supplied configuration
+
+Type: **test**  
+Read only: **True**
+
+#### Action Parameters
+No parameters are required for this action
+
+#### Action Output
+No Output

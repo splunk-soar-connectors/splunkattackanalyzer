@@ -54,66 +54,53 @@ class SplunkAttackAnalyzer:
         if state:
             params["state"] = state
 
-        if num_jobs >= 100:
-            self.paginate_jobs(num_jobs, params, url, jobs_list)
-
-        if num_jobs % 100 != 0:
-            params["count"] = num_jobs % 100
-            resp = requests.get(url, params=params, headers=self.get_header(), verify=self._verify, proxies=self._proxy, timeout=REQUEST_TIMEOUT)
-            resp.raise_for_status()
-            jobs_list.extend(resp.json())
+        self.paginate_jobs(num_jobs, params, url, jobs_list)
 
         return jobs_list
 
     def paginate_jobs(self, num_jobs, params, url, jobs_list):
-        while num_jobs >= 100:
-            params["count"] = 100
+        while num_jobs > 0:
+            params["count"] = 100 if num_jobs > 100 else num_jobs
             resp = requests.get(url, params=params, headers=self.get_header(), verify=self._verify, proxies=self._proxy, timeout=REQUEST_TIMEOUT)
             resp.raise_for_status()
-            jobs_list.extend(resp.json())
+            job_json = resp.json()
+            if not job_json:
+                break
+            jobs_list.extend(job_json)
             params["start"] = params["start"] + 100
             num_jobs = num_jobs - 100
 
-    def poll_for_done_jobs(self, limit):
+    def poll_for_done_jobs(self, limit, checkpoint):
         url = f"{self._host}/jobs/poll"
         time_now = datetime.now()
         job_list = list()
-        since = self._since
 
-        if not since:
-            since = 24
-            prev_date = time_now - timedelta(hours=since)
-            epoch_convert_time = prev_date.timestamp()
-        else:
-            prev_date = time_now - timedelta(hours=since)
-            epoch_convert_time = prev_date.timestamp()
+        prev_date = time_now - timedelta(self._since)
+
+        if checkpoint:
+            prev_date = checkpoint
+
+        epoch_convert_time = prev_date.timestamp()
         try:
-            resp = requests.get(url, params={"since": int(epoch_convert_time)}, headers=self.get_header(), timeout=REQUEST_TIMEOUT)
-            resp_json = resp.json()
-            job_list.extend(resp_json.get("Jobs"))
-
-            if limit <= len(job_list):
-                return job_list[:limit]
-
-            if len(job_list) == 25:
-                self.poll_paginate(resp_json["NextToken"], url, job_list, limit)
-
+            jobs = self.poll_paginate(url, job_list, limit, epoch_convert_time)
         except Exception:
             time.sleep(10)
 
-        return job_list
+        return jobs
 
-    def poll_paginate(self, next_token, url, job_list, limit):
+    def poll_paginate(self, url, job_list, limit, epoch_convert_time):
         while True:
-            resp = requests.get(url, params={"token": next_token}, headers=self.get_header(), timeout=REQUEST_TIMEOUT)
+            if not job_list:
+                param = {"since": int(epoch_convert_time)}
+            resp = requests.get(url, params=param, headers=self.get_header(), timeout=REQUEST_TIMEOUT)
             resp_json = resp.json()
-            if len(resp_json["Jobs"]) == 0:
+            job_list.extend(resp_json.get("Jobs"))
+            if not resp_json.get("Jobs"):
                 break
-            job_list.extend(resp_json["Jobs"])
-            next_token = resp_json["NextToken"]
-            if limit <= len(job_list):
-                job_list = job_list[:limit]
-                break
+            if limit and limit <= len(job_list):
+                return job_list[:limit]
+            param = {"token": resp_json.get("NextToken")}
+        return job_list
 
     def get_engines(self):
         url = f"{self._host}/engines"
