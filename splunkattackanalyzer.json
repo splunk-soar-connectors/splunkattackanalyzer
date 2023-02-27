@@ -34,8 +34,7 @@
             "description": "Start of time range stated in hours. If not specified, the default is past 24 hours"
         }
     },
-    "actions": [
-        {
+    "actions": [{
             "action": "get job screenshots",
             "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output",
             "identifier": "splunk_attack_analyzer_get_job_screenshots",
@@ -59,8 +58,7 @@
                     "order": 1
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -229,8 +227,7 @@
                     "order": 1
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -387,8 +384,7 @@
                     "order": 1
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -3937,8 +3933,7 @@
                     "order": 1
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -5696,8 +5691,7 @@
                     "default": 10
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -5767,7 +5761,12 @@
                     "data_type": "string",
                     "example_values": [
                         "014aeac1-1c49-41a6-aaf8-8033022b9afe"
-                    ]
+                    ],
+                    "contains": [
+                        "splunk attack analyzer job id"
+                    ],
+                    "column_name": "Job ID",
+                    "column_order": 0
                 },
                 {
                     "data_path": "action_result.data.*.Parameters",
@@ -6105,8 +6104,7 @@
                     "order": 0
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -6201,8 +6199,7 @@
                     "order": 0
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -6327,8 +6324,7 @@
         }
     ],
     "pip_dependencies": {
-        "wheel": [
-            {
+        "wheel": [{
                 "module": "certifi",
                 "input_file": "wheels/py3/certifi-2022.12.7-py3-none-any.whl"
             },
