@@ -73,25 +73,25 @@ class SplunkAttackAnalyzer:
     def poll_for_done_jobs(self, limit, checkpoint):
         url = f"{self._host}/jobs/poll"
         time_now = datetime.now()
-        job_list = list()
+        jobs = []
 
-        prev_date = time_now - timedelta(self._since)
-
-        if checkpoint:
-            prev_date = checkpoint
-
-        epoch_convert_time = prev_date.timestamp()
         try:
-            jobs = self.poll_paginate(url, job_list, limit, epoch_convert_time)
+            jobs = self.poll_paginate(url, limit, time_now, checkpoint)
         except Exception:
             time.sleep(10)
 
         return jobs
 
-    def poll_paginate(self, url, job_list, limit, epoch_convert_time):
+    def poll_paginate(self, url, limit, action_start_time, checkpoint):
+        job_list = list()
+        epoch_convert_time = None
+        if checkpoint:
+            epoch_convert_time = checkpoint.timestamp()
+
+        if not epoch_convert_time:
+            epoch_convert_time = (action_start_time - timedelta(hours=self._since)).timestamp()
+        param = {"since": int(epoch_convert_time)}
         while True:
-            if not job_list:
-                param = {"since": int(epoch_convert_time)}
             resp = requests.get(url, params=param, headers=self.get_header(), timeout=REQUEST_TIMEOUT)
             resp_json = resp.json()
             job_list.extend(resp_json.get("Jobs"))

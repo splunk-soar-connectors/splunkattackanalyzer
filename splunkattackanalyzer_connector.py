@@ -83,7 +83,10 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
     def initialize(self):
 
         # Load the state in initialize, use it to store data that needs to be accessed across actions
-        self._state = self.load_state()
+        try:
+            self._state = self.load_state()
+        except:
+            self.debug_print("State file is corrupted, resetting the file")
         if not isinstance(self._state, dict):
             self.debug_print("State file is corrupted, resetting the file")
             self.save_progresss("State file is corrupted, resetting the file")
@@ -260,13 +263,13 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         if not manual_polling:
             self.debug_print("DEBUGGER: Starting polling now")
-            checkpoint = self._state.get("UpdatedAt_Checkpoint", "0001-01-01T00:00:00.00Z")
+            checkpoint = self._state.get("UpdatedAt_Checkpoint")
             try:
-                datetime_checkpoint = datetime.strptime(checkpoint, "%Y-%m-%dT%H:%M:%S.%fZ")
+                if checkpoint:
+                    datetime_checkpoint = datetime.strptime(checkpoint, "%Y-%m-%dT%H:%M:%S.%fZ")
             except:
-                del self._state["UpdatedAt_Checkpoint"]
                 self.debug_print("State file is corrupted, resetting the file")
-                self.save_progresss("State file is corrupted, resetting the file")
+                self.save_progress("State file is corrupted, resetting the file")
                 self._state = {"app_version": self.get_app_json().get("app_version")}
                 self._handle_on_poll(params)
 
