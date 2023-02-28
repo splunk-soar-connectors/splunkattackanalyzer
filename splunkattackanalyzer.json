@@ -36,7 +36,7 @@
     },
     "actions": [{
             "action": "get job screenshots",
-            "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output",
+            "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.",
             "identifier": "splunk_attack_analyzer_get_job_screenshots",
             "description": "Get screenshots for the specified job and store them in the vault",
             "type": "investigate",
@@ -207,7 +207,7 @@
             "action": "get pdf report",
             "identifier": "splunk_attack_analyzer_get_job_pdf",
             "description": "Get the PDF report for a completed job",
-            "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output",
+            "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -362,7 +362,7 @@
         },
         {
             "action": "get job forensics",
-            "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output",
+            "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.",
             "identifier": "splunk_attack_analyzer_get_job_normalized_forensics",
             "description": "Get the consolidated forensics for a completed job",
             "type": "investigate",
@@ -3859,7 +3859,7 @@
             "action": "get job summary",
             "identifier": "splunk_attack_analyzer_get_job_summary",
             "description": "Get a job summary for a submitted job",
-            "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output",
+            "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.",
             "type": "investigate",
             "read_only": true,
             "parameters": {
@@ -5627,8 +5627,7 @@
                     "default": 10
                 }
             },
-            "output": [
-                {
+            "output": [{
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -6016,7 +6015,7 @@
                 {
                     "data_path": "action_result.summary.job_count",
                     "data_type": "numeric",
-                    "example_values":[
+                    "example_values": [
                         11
                     ]
                 },

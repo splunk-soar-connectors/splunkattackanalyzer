@@ -18,5 +18,6 @@ SPLUNK_ATTACK_ANALYZER_VALIDATE_NON_NEGATIVE_INTEGER_MESSAGE = "Please provide a
 SPLUNK_ATTACK_ANALYZER_VALIDATE_JOB_STATE = "Unable to {0}. The job is still in in-progress state"
 SPLUNK_ATTACK_ANALYZER_TIMEOUT_ERROR = "Timed out while waiting for job to be completed. Please retry the action again after sometime"
 JOB_POLL_INTERVAL = 30
-SPLUNK_ATTACK_ANALYZER_ERR_MSG_UNAVAILABLE = "Error message unavailable. Please check the asset configuration and|or the action parameters."
-SPLUNK_ATTACK_ANALYZER_ERR_CODE_UNAVAILABLE = "Error code unavailable"
+SPLUNK_ATTACK_ANALYZER_ERROR_MESSAGE_UNAVAILABLE = "Error message unavailable. \
+    Please check the asset configuration and|or the action parameters."
+SPLUNK_ATTACK_ANALYZER_ERROR_CODE_UNAVAILABLE = "Error code unavailable"

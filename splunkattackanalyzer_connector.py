@@ -109,20 +109,20 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         :return: error message
         """
 
-        error_code = SPLUNK_ATTACK_ANALYZER_ERR_CODE_UNAVAILABLE
-        error_msg = SPLUNK_ATTACK_ANALYZER_ERR_MSG_UNAVAILABLE
+        error_code = SPLUNK_ATTACK_ANALYZER_ERROR_CODE_UNAVAILABLE
+        error_message = SPLUNK_ATTACK_ANALYZER_ERROR_MESSAGE_UNAVAILABLE
 
         try:
             if e.args:
                 if len(e.args) > 1:
                     error_code = e.args[0]
-                    error_msg = str(e)
+                    error_message = str(e)
                 elif len(e.args) == 1:
-                    error_msg = e.args[0]
+                    error_message = e.args[0]
         except:
             pass
 
-        return "Error Code: {0}. Error Message: {1}".format(error_code, error_msg)
+        return "Error Code: {0}. Error Message: {1}".format(error_code, error_message)
 
     def _add_to_vault(self, data, filename):
         # this temp directory uses "V" since this function is from the CLASS instance not the same as the "v" vault instance
@@ -144,8 +144,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         except Exception as e:
             # the call to the 3rd party device or service failed
             # action result should contain all the error details so just return from here
-            error_msg = self._get_error_message_from_exception(e)
-            self.debug_print(error_msg)
+            error_message = self._get_error_message_from_exception(e)
+            self.debug_print(error_message)
             self.save_progress("Test Connectivity Failed")
             return action_result.set_status(phantom.APP_ERROR)
 
@@ -357,8 +357,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                 else:
                     return None, action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_TIMEOUT_ERROR)
             except Exception as e:
-                err_msg = self._get_error_message_from_exception(e)
-                return None, action_result.set_status(phantom.APP_ERROR, "Exception occured: {}".format(err_msg))
+                error_message = self._get_error_message_from_exception(e)
+                return None, action_result.set_status(phantom.APP_ERROR, "Exception occured: {}".format(error_message))
 
     def _handle_splunk_attack_analyzer_get_job_summary(self, params):
 
