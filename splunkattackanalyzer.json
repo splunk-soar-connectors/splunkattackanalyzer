@@ -15,7 +15,7 @@
         "Cloud, API: api.twinwave.io, API version: v1"
     ],
     "fips_compliant": true,
-    "app_version": "1.0.0",
+    "app_version": "1.0.1",
     "utctime_updated": "2022-01-31T21:58:52.481735Z",
     "package_name": "phantom_splunkattackanalyzer",
     "main_module": "splunkattackanalyzer_connector.py",
@@ -34,7 +34,8 @@
             "description": "Start of time range stated in hours. If not specified, the default is past 24 hours"
         }
     },
-    "actions": [{
+    "actions": [
+        {
             "action": "get job screenshots",
             "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.",
             "identifier": "splunk_attack_analyzer_get_job_screenshots",
@@ -58,7 +59,8 @@
                     "order": 1
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -227,7 +229,8 @@
                     "order": 1
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -384,7 +387,8 @@
                     "order": 1
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -3879,7 +3883,8 @@
                     "order": 1
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -5627,7 +5632,8 @@
                     "default": 10
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -6057,7 +6063,8 @@
                     "order": 0
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -6155,7 +6162,8 @@
                     "order": 0
                 }
             },
-            "output": [{
+            "output": [
+                {
                     "data_path": "action_result.status",
                     "data_type": "string",
                     "example_values": [
@@ -6283,7 +6291,8 @@
         }
     ],
     "pip_dependencies": {
-        "wheel": [{
+        "wheel": [
+            {
                 "module": "certifi",
                 "input_file": "wheels/py3/certifi-2022.12.7-py3-none-any.whl"
             },
