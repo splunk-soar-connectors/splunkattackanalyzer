@@ -4,7 +4,7 @@
 Publisher: Splunk  
 Connector Version: 1.0.1  
 Product Vendor: Splunk  
-Product Name: Splunk Attack Analyzer Connector for Splunk SOAR  
+Product Name: Splunk Attack Analyzer  
 Product Version Supported (regex): ".\*"  
 Minimum Product Version: 5.5.0  
 
@@ -83,7 +83,7 @@ The following actions are supported by the app:
 
 
 ### Configuration Variables
-The below configuration variables are required for this Connector to operate.  These variables are specified when configuring a Splunk Attack Analyzer Connector for Splunk SOAR asset in SOAR.
+The below configuration variables are required for this Connector to operate.  These variables are specified when configuring a Splunk Attack Analyzer asset in SOAR.
 
 VARIABLE | REQUIRED | TYPE | DESCRIPTION
 -------- | -------- | ---- | -----------
