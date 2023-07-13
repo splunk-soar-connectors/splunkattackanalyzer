@@ -1,6 +1,6 @@
 {
     "appid": "de681fee-c552-45bf-9212-827b1c7529f8",
-    "name": "Splunk Attack Analyzer",
+    "name": "Splunk Attack Analyzer Connector for Splunk SOAR",
     "description": "This connector integrates with the Splunk Attack Analyzer platform to reduce the friction of repetitive manual tasks typically associated with investigating threats",
     "type": "investigative",
     "product_vendor": "Splunk",
