@@ -2,11 +2,11 @@
 # Splunk Attack Analyzer Connector for Splunk SOAR
 
 Publisher: Splunk  
-Connector Version: 1.0.2  
+Connector Version: 1.1.2  
 Product Vendor: Splunk  
 Product Name: Splunk Attack Analyzer  
 Product Version Supported (regex): ".\*"  
-Minimum Product Version: 5.5.0  
+Minimum Product Version: 5.1.0  
 
 This connector integrates with the Splunk Attack Analyzer platform to reduce the friction of repetitive manual tasks typically associated with investigating threats
 
