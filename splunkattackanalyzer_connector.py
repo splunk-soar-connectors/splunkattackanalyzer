@@ -193,13 +193,25 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         try:
             file_id = params.get("file")
+            wa_exit_region = params.get("wa_exit_region")
+            user_agent = params.get("user_agent")
+
+            saa_parameters = None
+            if wa_exit_region or user_agent:
+                saa_parameters = {}
+
+                if wa_exit_region:
+                    saa_parameters["wa_exit_region"] = wa_exit_region
+                if user_agent:
+                    saa_parameters["user_agent"] = user_agent
+
             success, message, info = vault.vault_info(vault_id=file_id)
             file_path = info[0]["path"]
             file_name = info[0]["name"]
             f = open(file_path, "rb")
             file_data = f.read()
             f.close()
-            submit_data = self._splunkattackanalyzer.submit_file(file_name, file_data)
+            submit_data = self._splunkattackanalyzer.submit_file(file_name, file_data, parameters=saa_parameters)
         except Exception as err:
             self.save_progress(str(err))
             return action_result.set_status(phantom.APP_ERROR, "Unable to submit file")
@@ -219,7 +231,20 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         try:
             url = params.get("url")
-            submit_data = self._splunkattackanalyzer.submit_url(url)
+
+            wa_exit_region = params.get("wa_exit_region")
+            user_agent = params.get("user_agent")
+
+            saa_parameters = None
+            if wa_exit_region or user_agent:
+                saa_parameters = {}
+
+                if wa_exit_region:
+                    saa_parameters["wa_exit_region"] = wa_exit_region
+                if user_agent:
+                    saa_parameters["user_agent"] = user_agent
+
+            submit_data = self._splunkattackanalyzer.submit_url(url, parameters=saa_parameters)
         except Exception as e:
             self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
             return action_result.set_status(phantom.APP_ERROR, "Unable to submit url")

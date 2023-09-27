@@ -121,8 +121,11 @@ class SplunkAttackAnalyzer:
         return resp.json()
 
     def submit_url(self, scan_url, engine_list=[], parameters=None, priority=None, profile=None):
+        
+        parameters_to_submit = self.format_parameters_for_submission(parameters)
+
         url = f"{self._host}/jobs/urls"
-        req = {"url": scan_url, "engines": engine_list, "parameters": parameters}
+        req = {"url": scan_url, "engines": engine_list, "parameters": parameters_to_submit}
         if priority:
             req["priority"] = priority
         if profile:
@@ -132,7 +135,8 @@ class SplunkAttackAnalyzer:
         resp.raise_for_status()
         return resp.json()
 
-    def submit_file(self, file_name, file_obj, engine_list=[], priority=None, profile=None):
+    def submit_file(self, file_name, file_obj, engine_list=[], priority=None, profile=None, parameters=None):
+
         url = f"{self._host}/jobs/files"
         payload = {}
         file_dict = {"filedata": file_obj}
@@ -140,6 +144,7 @@ class SplunkAttackAnalyzer:
         payload["filename"] = (None, file_name)
         payload["priority"] = priority
         payload["profile"] = profile
+        payload["parameters"] = json.dumps(self.format_parameters_for_submission(parameters))
 
         resp = requests.post(url, data=payload, files=file_dict, headers=self.get_header(), verify=self._verify, proxies=self._proxy,
             timeout=REQUEST_TIMEOUT)
@@ -157,3 +162,10 @@ class SplunkAttackAnalyzer:
         resp = requests.get(url, headers=self.get_header(), verify=self._verify, proxies=self._proxy, stream=True, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
         return resp.content
+    
+    def format_parameters_for_submission(self, param_dict):
+        
+        if not param_dict:
+            return []
+
+        return [{"Name": name, "Value": value} for name, value in param_dict.items()]

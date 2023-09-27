@@ -6061,6 +6061,22 @@
                         "vault id"
                     ],
                     "order": 0
+                },
+                "ph_0": {
+                    "description": "Placeholder",
+                    "data_type": "ph",
+                    "order": 1
+                },        
+                "wa_exit_region": {
+                    "description": "Specify a custom GeoIP-based exit region for Web Analyzer runs. Will fallback to the default exit region if not specified",
+                    "data_type": "string",
+                    "value_list": ["us_residential", "us", "asia", "europe"],
+                    "order": 2
+                },
+                "user_agent": {
+                    "description": "Specify a custom User Agent for Web Analyzer to use. Omit to use the default. Refer to the SAA documentation for canned User Agents for common devices",
+                    "data_type": "string",
+                    "order": 3
                 }
             },
             "output": [
@@ -6160,6 +6176,22 @@
                     "required": true,
                     "primary": true,
                     "order": 0
+                },
+                "ph_0": {
+                    "description": "Placeholder",
+                    "data_type": "ph",
+                    "order": 1
+                },        
+                "wa_exit_region": {
+                    "description": "Specify a custom GeoIP-based exit region for Web Analyzer runs. Will fallback to the default exit region if not specified",
+                    "data_type": "string",
+                    "value_list": ["us_residential", "us", "asia", "europe"],
+                    "order": 2
+                },
+                "user_agent": {
+                    "description": "Specify a custom User Agent for Web Analyzer to use. Omit to use the default. Refer to the SAA documentation for canned User Agents for common devices",
+                    "data_type": "string",
+                    "order": 3
                 }
             },
             "output": [
