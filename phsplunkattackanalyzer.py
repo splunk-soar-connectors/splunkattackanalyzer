@@ -121,7 +121,7 @@ class SplunkAttackAnalyzer:
         return resp.json()
 
     def submit_url(self, scan_url, engine_list=[], parameters=None, priority=None, profile=None):
-        
+
         parameters_to_submit = self.format_parameters_for_submission(parameters)
 
         url = f"{self._host}/jobs/urls"
@@ -162,9 +162,9 @@ class SplunkAttackAnalyzer:
         resp = requests.get(url, headers=self.get_header(), verify=self._verify, proxies=self._proxy, stream=True, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
         return resp.content
-    
+
     def format_parameters_for_submission(self, param_dict):
-        
+
         if not param_dict:
             return []
 
