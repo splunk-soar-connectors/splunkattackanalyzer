@@ -21,3 +21,9 @@ JOB_POLL_INTERVAL = 30
 SPLUNK_ATTACK_ANALYZER_ERROR_MESSAGE_UNAVAILABLE = "Error message unavailable. \
     Please check the asset configuration and|or the action parameters."
 SPLUNK_ATTACK_ANALYZER_ERROR_CODE_UNAVAILABLE = "Error code unavailable"
+SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS = {
+    "US Residential": "us_residential",
+    "US": "us",
+    "Asia": "asia",
+    "Europe": "europe"
+}

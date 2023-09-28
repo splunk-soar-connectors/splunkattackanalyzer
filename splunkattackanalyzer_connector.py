@@ -193,17 +193,24 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         try:
             file_id = params.get("file")
-            wa_exit_region = params.get("wa_exit_region")
-            user_agent = params.get("user_agent")
+            internet_region = params.get("internet_region")
+            user_agent = params["user_agent"]
+            custom_user_agent = params.get("custom_user_agent")
 
-            saa_parameters = None
-            if wa_exit_region or user_agent:
-                saa_parameters = {}
+            wa_exit_region = SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.get(internet_region)
 
-                if wa_exit_region:
-                    saa_parameters["wa_exit_region"] = wa_exit_region
-                if user_agent:
-                    saa_parameters["user_agent"] = user_agent
+            saa_parameters = {}
+
+            if wa_exit_region:
+                saa_parameters["wa_exit_region"] = wa_exit_region
+
+            if user_agent == "Custom":
+                if not custom_user_agent:
+                    return action_result.set_status(phantom.APP_ERROR, "Custom user agent needs to be provided as a parameter")
+                saa_parameters["user_agent"] = custom_user_agent
+            else:
+                saa_parameters["user_agent"] = f"alias:{user_agent}"
+
 
             success, message, info = vault.vault_info(vault_id=file_id)
             file_path = info[0]["path"]
@@ -232,17 +239,23 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         try:
             url = params.get("url")
 
-            wa_exit_region = params.get("wa_exit_region")
-            user_agent = params.get("user_agent")
+            internet_region = params.get("internet_region")
+            user_agent = params["user_agent"]
+            custom_user_agent = params.get("custom_user_agent")
 
-            saa_parameters = None
-            if wa_exit_region or user_agent:
-                saa_parameters = {}
+            wa_exit_region = SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.get(internet_region)
 
-                if wa_exit_region:
-                    saa_parameters["wa_exit_region"] = wa_exit_region
-                if user_agent:
-                    saa_parameters["user_agent"] = user_agent
+            saa_parameters = {}
+
+            if wa_exit_region:
+                saa_parameters["wa_exit_region"] = wa_exit_region
+
+            if user_agent == "Custom":
+                if not custom_user_agent:
+                    return action_result.set_status(phantom.APP_ERROR, "Custom user agent needs to be provided as a parameter")
+                saa_parameters["user_agent"] = custom_user_agent
+            else:
+                saa_parameters["user_agent"] = f"alias:{user_agent}"
 
             submit_data = self._splunkattackanalyzer.submit_url(url, parameters=saa_parameters)
         except Exception as e:
