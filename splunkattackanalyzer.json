@@ -6079,12 +6079,12 @@
                     "description": "Specify a custom GeoIP-based exit region for Web Analyzer runs. Will fallback to the default exit region if not specified",
                     "data_type": "string",
                     "value_list": ["US Residential", "US", "Asia", "Europe"],
-                    "order": 2
+                    "order": 3
                 },
                 "custom_user_agent": {
                     "description": "Specify a custom User Agent for Web Analyzer to use. Omit to use the default. Refer to the SAA documentation for canned User Agents for common devices",
                     "data_type": "string",
-                    "order": 3
+                    "order": 4
                 }
             },
             "output": [
@@ -6111,8 +6111,6 @@
                 {
                     "data_path": "action_result.parameter.user_agent",
                     "data_type": "string",
-                    "column_name": "User Agent",
-                    "column_order": 1,
                     "example_values": [
                         "Default",
                         "iPhone 6"
@@ -6121,8 +6119,6 @@
                 {
                     "data_path": "action_result.parameter.custom_user_agent",
                     "data_type": "string",
-                    "column_name": "Custom User Agent",
-                    "column_order": 2,
                     "example_values": [
                         "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
                     ]
@@ -6231,12 +6227,12 @@
                     "description": "Specify a custom GeoIP-based exit region for Web Analyzer runs. Will fallback to the default exit region if not specified",
                     "data_type": "string",
                     "value_list": ["US Residential", "US", "Asia", "Europe"],
-                    "order": 2
+                    "order": 3
                 },
                 "custom_user_agent": {
                     "description": "Specify a custom User Agent for Web Analyzer to use. Select \"Custom\" in the user agent parameter to use the value supplied in this field",
                     "data_type": "string",
-                    "order": 3
+                    "order": 4
                 }
             },
             "output": [
@@ -6263,8 +6259,6 @@
                 {
                     "data_path": "action_result.parameter.user_agent",
                     "data_type": "string",
-                    "column_name": "User Agent",
-                    "column_order": 1,
                     "example_values": [
                         "Default",
                         "iPhone 6"
@@ -6273,8 +6267,6 @@
                 {
                     "data_path": "action_result.parameter.custom_user_agent",
                     "data_type": "string",
-                    "column_name": "Custom User Agent",
-                    "column_order": 2,
                     "example_values": [
                         "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
                     ]
