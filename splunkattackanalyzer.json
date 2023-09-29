@@ -6072,19 +6072,41 @@
                     "data_type": "string",
                     "default": "Default",
                     "required": true,
-                    "value_list": ["Default", "Custom", "Desktop Chrome", "Desktop Edge", "Desktop Firefox", "Desktop Safari", "Galaxy S8", "iPhone 6", "iPhone 8", "iPhone 12", "Pixel 5"],
+                    "value_list": [
+                        "Default",
+                        "Custom",
+                        "Desktop Chrome",
+                        "Desktop Edge",
+                        "Desktop Firefox",
+                        "Desktop Safari",
+                        "Galaxy S8",
+                        "iPhone 6",
+                        "iPhone 8",
+                        "iPhone 12",
+                        "Pixel 5"
+                    ],
                     "order": 2
-                },        
+                },
                 "internet_region": {
                     "description": "Specify a custom GeoIP-based exit region for Web Analyzer runs. Will fallback to the default exit region if not specified",
                     "data_type": "string",
-                    "value_list": ["US Residential", "US", "Asia", "Europe"],
+                    "value_list": [
+                        "US Residential",
+                        "US",
+                        "Asia",
+                        "Europe"
+                    ],
                     "order": 3
                 },
                 "custom_user_agent": {
                     "description": "Specify a custom User Agent for Web Analyzer to use. Omit to use the default. Refer to the SAA documentation for canned User Agents for common devices",
                     "data_type": "string",
                     "order": 4
+                },
+                "archive_password": {
+                    "description": "An optional password for extracting files from password-protected archive files or for decrypting documents.",
+                    "data_type": "string",
+                    "order": 5
                 }
             },
             "output": [
@@ -6132,6 +6154,10 @@
                         "US Residential",
                         "US"
                     ]
+                },
+                {
+                    "data_path": "action_result.parameter.archive_password",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.data.*.AppURL",
@@ -6220,19 +6246,44 @@
                     "data_type": "string",
                     "default": "Default",
                     "required": true,
-                    "value_list": ["Default", "Custom", "Desktop Chrome", "Desktop Edge", "Desktop Firefox", "Desktop Safari", "Galaxy S8", "iPhone 6", "iPhone 8", "iPhone 12", "Pixel 5", "Mobile", "iPhone X", "iPad (gen 7)"],
+                    "value_list": [
+                        "Default",
+                        "Custom",
+                        "Desktop Chrome",
+                        "Desktop Edge",
+                        "Desktop Firefox",
+                        "Desktop Safari",
+                        "Galaxy S8",
+                        "iPhone 6",
+                        "iPhone 8",
+                        "iPhone 12",
+                        "Pixel 5",
+                        "Mobile",
+                        "iPhone X",
+                        "iPad (gen 7)"
+                    ],
                     "order": 2
-                },        
+                },
                 "internet_region": {
                     "description": "Specify a custom GeoIP-based exit region for Web Analyzer runs. Will fallback to the default exit region if not specified",
                     "data_type": "string",
-                    "value_list": ["US Residential", "US", "Asia", "Europe"],
+                    "value_list": [
+                        "US Residential",
+                        "US",
+                        "Asia",
+                        "Europe"
+                    ],
                     "order": 3
                 },
                 "custom_user_agent": {
                     "description": "Specify a custom User Agent for Web Analyzer to use. Select \"Custom\" in the user agent parameter to use the value supplied in this field",
                     "data_type": "string",
                     "order": 4
+                },
+                "archive_password": {
+                    "description": "An optional password for extracting files from password-protected archive files or for decrypting documents.",
+                    "data_type": "string",
+                    "order": 5
                 }
             },
             "output": [
@@ -6280,6 +6331,10 @@
                         "US Residential",
                         "US"
                     ]
+                },
+                {
+                    "data_path": "action_result.parameter.archive_password",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.data.*.AppURL",
@@ -6392,7 +6447,7 @@
         "wheel": [
             {
                 "module": "certifi",
-                "input_file": "wheels/py3/certifi-2022.12.7-py3-none-any.whl"
+                "input_file": "wheels/py3/certifi-2023.7.22-py3-none-any.whl"
             },
             {
                 "module": "charset_normalizer",
@@ -6408,7 +6463,7 @@
             },
             {
                 "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.14-py2.py3-none-any.whl"
+                "input_file": "wheels/shared/urllib3-1.26.16-py2.py3-none-any.whl"
             }
         ]
     }

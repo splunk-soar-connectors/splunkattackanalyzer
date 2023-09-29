@@ -196,6 +196,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             internet_region = params.get("internet_region")
             user_agent = params["user_agent"]
             custom_user_agent = params.get("custom_user_agent")
+            archive_password = params.get("archive_password")
 
             wa_exit_region = SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.get(internet_region)
 
@@ -204,13 +205,18 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             if wa_exit_region:
                 saa_parameters["wa_exit_region"] = wa_exit_region
 
+            if archive_password:
+                saa_parameters["archive_document_password"] = archive_password
+
             if user_agent == "Custom":
                 if not custom_user_agent:
                     return action_result.set_status(phantom.APP_ERROR, "Custom user agent needs to be provided as a parameter")
                 saa_parameters["user_agent"] = custom_user_agent
+            elif user_agent == "Default":
+                # No need to set a parameter in this case, SAA will pick the default
+                pass
             else:
                 saa_parameters["user_agent"] = f"alias:{user_agent}"
-
 
             success, message, info = vault.vault_info(vault_id=file_id)
             file_path = info[0]["path"]
@@ -242,6 +248,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             internet_region = params.get("internet_region")
             user_agent = params["user_agent"]
             custom_user_agent = params.get("custom_user_agent")
+            archive_password = params.get("archive_password")
 
             wa_exit_region = SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.get(internet_region)
 
@@ -250,10 +257,16 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             if wa_exit_region:
                 saa_parameters["wa_exit_region"] = wa_exit_region
 
+            if archive_password:
+                saa_parameters["archive_document_password"] = archive_password
+
             if user_agent == "Custom":
                 if not custom_user_agent:
                     return action_result.set_status(phantom.APP_ERROR, "Custom user agent needs to be provided as a parameter")
                 saa_parameters["user_agent"] = custom_user_agent
+            elif user_agent == "Default":
+                # No need to set a parameter in this case, SAA will pick the default
+                pass
             else:
                 saa_parameters["user_agent"] = f"alias:{user_agent}"
 
