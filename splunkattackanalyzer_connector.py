@@ -49,6 +49,15 @@ def _make_resource_tree(resources):
     return root
 
 
+def _validate_user_agent_options(action_result, user_agent):
+    # This function makes sure that - user-agent is selected from the dropdown menu only
+    if user_agent not in SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES:
+        return action_result.set_status(phantom.APP_ERROR,
+        SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE.format
+        (SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES))
+    return phantom.APP_SUCCESS
+
+
 def _validate_integer(action_result, parameter, key):
     """
     Validate an integer.
@@ -216,6 +225,11 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                 # No need to set a parameter in this case, SAA will pick the default
                 pass
             else:
+                ret_val = _validate_user_agent_options(action_result, user_agent)
+                if phantom.is_fail(ret_val):
+                    self.save_progress(SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE.
+                        format(SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES))
+                    return action_result.get_status()
                 saa_parameters["user_agent"] = f"alias:{user_agent}"
 
             success, message, info = vault.vault_info(vault_id=file_id)
@@ -268,6 +282,11 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                 # No need to set a parameter in this case, SAA will pick the default
                 pass
             else:
+                ret_val = _validate_user_agent_options(action_result, user_agent)
+                if phantom.is_fail(ret_val):
+                    self.save_progress(SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE.
+                        format(SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES))
+                    return action_result.get_status()
                 saa_parameters["user_agent"] = f"alias:{user_agent}"
 
             submit_data = self._splunkattackanalyzer.submit_url(url, parameters=saa_parameters)
