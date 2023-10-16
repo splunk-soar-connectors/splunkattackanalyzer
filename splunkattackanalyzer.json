@@ -1716,13 +1716,6 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.data.*.HTTP.*.ResponseHeaders.test-action",
-                    "data_type": "string",
-                    "example_values": [
-                        "1"
-                    ]
-                },
-                {
                     "data_path": "action_result.data.*.HTTP.*.ResponseHeaders.location",
                     "data_type": "string",
                     "example_values": [
@@ -1857,6 +1850,13 @@
                     "data_type": "string",
                     "example_values": [
                         "max-age=31536000"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.HTTP.*.ResponseHeaders.test-action",
+                    "data_type": "string",
+                    "example_values": [
+                        "1"
                     ]
                 },
                 {
@@ -6012,17 +6012,17 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "Job count: 11"
-                    ]
-                },
-                {
                     "data_path": "action_result.summary.job_count",
                     "data_type": "numeric",
                     "example_values": [
                         11
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Job count: 11"
                     ]
                 },
                 {
@@ -6104,7 +6104,7 @@
                     "order": 4
                 },
                 "archive_password": {
-                    "description": "An optional password for extracting files from password-protected archive files or for decrypting documents.",
+                    "description": "An optional password for extracting files from password-protected archive files or for decrypting documents",
                     "data_type": "string",
                     "order": 5
                 }
@@ -6116,6 +6116,17 @@
                     "example_values": [
                         "success",
                         "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.archive_password",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.custom_user_agent",
+                    "data_type": "string",
+                    "example_values": [
+                        "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
                     ]
                 },
                 {
@@ -6131,21 +6142,6 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.user_agent",
-                    "data_type": "string",
-                    "example_values": [
-                        "Default",
-                        "iPhone 6"
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.custom_user_agent",
-                    "data_type": "string",
-                    "example_values": [
-                        "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
-                    ]
-                },
-                {
                     "data_path": "action_result.parameter.internet_region",
                     "data_type": "string",
                     "column_name": "Internet Region",
@@ -6156,8 +6152,12 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.archive_password",
-                    "data_type": "string"
+                    "data_path": "action_result.parameter.user_agent",
+                    "data_type": "string",
+                    "example_values": [
+                        "Default",
+                        "iPhone 6"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.AppURL",
@@ -6281,7 +6281,7 @@
                     "order": 4
                 },
                 "archive_password": {
-                    "description": "An optional password for extracting files from password-protected archive files or for decrypting documents.",
+                    "description": "An optional password for extracting files from password-protected archive files or for decrypting documents",
                     "data_type": "string",
                     "order": 5
                 }
@@ -6293,6 +6293,27 @@
                     "example_values": [
                         "success",
                         "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.archive_password",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.custom_user_agent",
+                    "data_type": "string",
+                    "example_values": [
+                        "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.internet_region",
+                    "data_type": "string",
+                    "column_name": "Internet Region",
+                    "column_order": 3,
+                    "example_values": [
+                        "US Residential",
+                        "US"
                     ]
                 },
                 {
@@ -6314,27 +6335,6 @@
                         "Default",
                         "iPhone 6"
                     ]
-                },
-                {
-                    "data_path": "action_result.parameter.custom_user_agent",
-                    "data_type": "string",
-                    "example_values": [
-                        "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.internet_region",
-                    "data_type": "string",
-                    "column_name": "Internet Region",
-                    "column_order": 3,
-                    "example_values": [
-                        "US Residential",
-                        "US"
-                    ]
-                },
-                {
-                    "data_path": "action_result.parameter.archive_password",
-                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.data.*.AppURL",
