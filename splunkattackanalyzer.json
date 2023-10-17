@@ -6071,7 +6071,6 @@
                     "description": "Specify a custom GeoIP-based exit region for Web Analyzer runs. Will fallback to the default exit region if not specified",
                     "data_type": "string",
                     "default": "Default",
-                    "required": true,
                     "value_list": [
                         "Default",
                         "Custom",
@@ -6245,7 +6244,6 @@
                     "description": "Specify a specific user agent for Web Analyzer runs. When selecting \"Custom\", provide a value in the custom user agent parameter",
                     "data_type": "string",
                     "default": "Default",
-                    "required": true,
                     "value_list": [
                         "Default",
                         "Custom",
