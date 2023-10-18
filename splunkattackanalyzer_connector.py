@@ -233,13 +233,13 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                 saa_parameters["archive_document_password"] = archive_password
 
             if user_agent:
-                if user_agent == "Custom" or user_agent == "custom":
+                if user_agent == "Default":
+                    # No need to set a parameter in this case, SAA will pick the default
+                    pass
+                elif user_agent == "Custom" or user_agent == "custom":
                     if not custom_user_agent:
                         return action_result.set_status(phantom.APP_ERROR, "Custom user agent needs to be provided as a parameter")
                     saa_parameters["user_agent"] = custom_user_agent
-                elif user_agent == "Default":
-                    # No need to set a parameter in this case, SAA will pick the default
-                    pass
                 else:
                     ret_val = _validate_user_agent_options(action_result, user_agent)
                     if phantom.is_fail(ret_val):
