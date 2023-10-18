@@ -6068,7 +6068,7 @@
                     "order": 1
                 },
                 "user_agent": {
-                    "description": "Specify a specific user agent for Web Analyzer runs. When selecting \"Custom\", provide a value in the custom user agent parameter",
+                    "description": "User agent for Web Analyzer runs. Select \"Custom\" to provide custom user agent",
                     "data_type": "string",
                     "default": "Default",
                     "value_list": [
@@ -6087,7 +6087,7 @@
                     "order": 2
                 },
                 "internet_region": {
-                    "description": "Specify a custom GeoIP-based exit region for Web Analyzer runs. Will fallback to the default exit region if not specified",
+                    "description": "GeoIP-based exit region for Web Analyzer runs.",
                     "data_type": "string",
                     "value_list": [
                         "US Residential",
@@ -6098,12 +6098,12 @@
                     "order": 3
                 },
                 "custom_user_agent": {
-                    "description": "Specify a custom User Agent for Web Analyzer to use. Omit to use the default. Refer to the SAA documentation for canned User Agents for common devices",
+                    "description": "Activated when user agent is \"Custom\"",
                     "data_type": "string",
                     "order": 4
                 },
                 "archive_password": {
-                    "description": "An optional password for extracting files from password-protected archive files or for decrypting documents",
+                    "description": "For password-protected archive files or for decrypting documents",
                     "data_type": "string",
                     "order": 5
                 }
@@ -6241,7 +6241,7 @@
                     "order": 1
                 },
                 "user_agent": {
-                    "description": "Specify a specific user agent for Web Analyzer runs. When selecting \"Custom\", provide a value in the custom user agent parameter",
+                    "description": "User agent for Web Analyzer runs. \"Custom\" to provide custom user agent",
                     "data_type": "string",
                     "default": "Default",
                     "value_list": [
@@ -6263,7 +6263,7 @@
                     "order": 2
                 },
                 "internet_region": {
-                    "description": "Specify a custom GeoIP-based exit region for Web Analyzer runs. Will fallback to the default exit region if not specified",
+                    "description": "GeoIP-based exit region for Web Analyzer runs.",
                     "data_type": "string",
                     "value_list": [
                         "US Residential",
@@ -6274,12 +6274,12 @@
                     "order": 3
                 },
                 "custom_user_agent": {
-                    "description": "Specify a custom User Agent for Web Analyzer to use. Select \"Custom\" in the user agent parameter to use the value supplied in this field",
+                    "description": "Activated when user agent is \"Custom\"",
                     "data_type": "string",
                     "order": 4
                 },
                 "archive_password": {
-                    "description": "An optional password for extracting files from password-protected archive files or for decrypting documents",
+                    "description": "For password-protected archive files or for decrypting documents",
                     "data_type": "string",
                     "order": 5
                 }
