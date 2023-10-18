@@ -54,7 +54,7 @@ def _validate_internet_region_options(action_result, wa_exit_region):
     if wa_exit_region not in list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys()):
         return action_result.set_status(phantom.APP_ERROR,
         SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.format
-        (list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys)))
+        (list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys())))
     return phantom.APP_SUCCESS
 
 
