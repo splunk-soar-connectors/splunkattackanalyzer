@@ -6068,7 +6068,7 @@
                     "order": 1
                 },
                 "user_agent": {
-                    "description": "Specify a custom GeoIP-based exit region for Web Analyzer runs. Will fallback to the default exit region if not specified",
+                    "description": "Specify a specific user agent for Web Analyzer runs. When selecting \"Custom\", provide a value in the custom user agent parameter",
                     "data_type": "string",
                     "default": "Default",
                     "value_list": [
@@ -6120,13 +6120,6 @@
                 {
                     "data_path": "action_result.parameter.archive_password",
                     "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.parameter.custom_user_agent",
-                    "data_type": "string",
-                    "example_values": [
-                        "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
-                    ]
                 },
                 {
                     "data_path": "action_result.parameter.file",
@@ -6296,13 +6289,6 @@
                 {
                     "data_path": "action_result.parameter.archive_password",
                     "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.parameter.custom_user_agent",
-                    "data_type": "string",
-                    "example_values": [
-                        "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
-                    ]
                 },
                 {
                     "data_path": "action_result.parameter.internet_region",
