@@ -49,6 +49,15 @@ def _make_resource_tree(resources):
     return root
 
 
+def _validate_internet_region_options(action_result, wa_exit_region):
+    # This function makes sure that - 'internet region' is selected from the dropdown menu only
+    if wa_exit_region not in list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys()):
+        return action_result.set_status(phantom.APP_ERROR,
+        SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.format
+        (list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys)))
+    return phantom.APP_SUCCESS
+
+
 def _validate_user_agent_options(action_result, user_agent):
     # This function makes sure that - user-agent is selected from the dropdown menu only
     if user_agent not in SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES:
@@ -207,6 +216,12 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             custom_user_agent = params.get("custom_user_agent")
             archive_password = params.get("archive_password")
 
+            if internet_region is not None:
+                ret_val = _validate_internet_region_options(action_result, internet_region)
+                if phantom.is_fail(ret_val):
+                    self.save_progress(SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.
+                        format(list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys())))
+                    return action_result.get_status()
             wa_exit_region = SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.get(internet_region)
 
             saa_parameters = {}
@@ -264,6 +279,12 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             custom_user_agent = params.get("custom_user_agent")
             archive_password = params.get("archive_password")
 
+            if internet_region is not None:
+                ret_val = _validate_internet_region_options(action_result, internet_region)
+                if phantom.is_fail(ret_val):
+                    self.save_progress(SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.
+                        format(list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys())))
+                    return action_result.get_status()
             wa_exit_region = SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.get(internet_region)
 
             saa_parameters = {}
