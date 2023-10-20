@@ -2,11 +2,11 @@
 # Splunk Attack Analyzer Connector for Splunk SOAR
 
 Publisher: Splunk  
-Connector Version: 1.0.2  
+Connector Version: 1.1.0  
 Product Vendor: Splunk  
 Product Name: Splunk Attack Analyzer  
 Product Version Supported (regex): ".\*"  
-Minimum Product Version: 5.5.0  
+Minimum Product Version: 6.1.0  
 
 This connector integrates with the Splunk Attack Analyzer platform to reduce the friction of repetitive manual tasks typically associated with investigating threats
 
@@ -410,7 +410,6 @@ action_result.data.\*.HTTP.\*.ResponseHeaders.intuit_tid | string |  |   18375f0
 action_result.data.\*.HTTP.\*.ResponseHeaders.keep-alive | string |  |   timeout=2, max=100 
 action_result.data.\*.HTTP.\*.ResponseHeaders.last-modified | string |  |   Wed, 27 Apr 2022 18:34:52 GMT 
 action_result.data.\*.HTTP.\*.ResponseHeaders.link | string |  |   <https://fonts.test.com>; rel=preconnect; crossorigin 
-action_result.data.\*.HTTP.\*.ResponseHeaders.test-action | string |  |   1 
 action_result.data.\*.HTTP.\*.ResponseHeaders.location | string |  |   https://data.xyz.com/b/ss/xee/1/H.20.3/s28372352737215?AQB= 
 action_result.data.\*.HTTP.\*.ResponseHeaders.ms-cv | string |  |   0TwjKmhArkqpx27S.0 
 action_result.data.\*.HTTP.\*.ResponseHeaders.ms-cv-esi | string |  |   CASCV4deabe4.0 
@@ -431,6 +430,7 @@ action_result.data.\*.HTTP.\*.ResponseHeaders.request-id | string |  |   ba7cb24
 action_result.data.\*.HTTP.\*.ResponseHeaders.server | string |  |   DatabaseS3 
 action_result.data.\*.HTTP.\*.ResponseHeaders.server-timing | string |  |   edge; dur=1, origin; dur=11, cdn-cache; desc=MISS 
 action_result.data.\*.HTTP.\*.ResponseHeaders.strict-transport-security | string |  |   max-age=31536000 
+action_result.data.\*.HTTP.\*.ResponseHeaders.test-action | string |  |   1 
 action_result.data.\*.HTTP.\*.ResponseHeaders.time-delta-millis | string |  |   384 
 action_result.data.\*.HTTP.\*.ResponseHeaders.timing-allow-origin | string |  |   \*, \* 
 action_result.data.\*.HTTP.\*.ResponseHeaders.tls_version | string |  |   tls1.3 
@@ -1186,8 +1186,8 @@ action_result.data.\*.TenantID | string |  |   test-tenant
 action_result.data.\*.UpdatedAt | string |  |   2023-02-24T10:40:31.936Z 
 action_result.data.\*.Username | string |  |  
 action_result.data.\*.Verdict | string |  |  
-action_result.message | string |  |   Job count: 11 
 action_result.summary.job_count | numeric |  |   11 
+action_result.message | string |  |   Job count: 11 
 summary.total_objects | numeric |  |   1 
 summary.total_objects_successful | numeric |  |   1   
 
@@ -1201,12 +1201,20 @@ Read only: **False**
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **file** |  required  | File hash to submit | string |  `vault id` 
+**user_agent** |  optional  | User agent for Web Analyzer runs (Select "Custom" to provide custom user agent) | string | 
+**internet_region** |  optional  | GeoIP-based exit region for Web Analyzer runs | string | 
+**custom_user_agent** |  optional  | Activated when user agent is "Custom" | string | 
+**archive_password** |  optional  | For password-protected archive files or for decrypting documents | string | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
 action_result.status | string |  |   success  failed 
+action_result.parameter.archive_password | string |  |  
+action_result.parameter.custom_user_agent | string |  |   Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0 
 action_result.parameter.file | string |  `vault id`  |   89b238c79f7752948b176222ae0010d0a1aa 
+action_result.parameter.internet_region | string |  |   US Residential  US 
+action_result.parameter.user_agent | string |  |   Default  iPhone 6 
 action_result.data.\*.AppURL | string |  `url`  |  
 action_result.data.\*.JobID | string |  `splunk attack analyzer job id`  |   63572265-c5ae-402f-9fc1-6c90547482XX 
 action_result.data.\*.QueueDepth | numeric |  |  
@@ -1226,12 +1234,20 @@ Read only: **False**
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **url** |  required  | URL to submit | string |  `url` 
+**user_agent** |  optional  | User agent for Web Analyzer runs (Select "Custom" to provide custom user agent) | string | 
+**internet_region** |  optional  | GeoIP-based exit region for Web Analyzer runs | string | 
+**custom_user_agent** |  optional  | Activated when user agent is "Custom" | string | 
+**archive_password** |  optional  | For password-protected archive files or for decrypting documents | string | 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
 action_result.status | string |  |   success  failed 
+action_result.parameter.archive_password | string |  |  
+action_result.parameter.custom_user_agent | string |  |   Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0 
+action_result.parameter.internet_region | string |  |   US Residential  US 
 action_result.parameter.url | string |  `url`  |   https://test_url.com 
+action_result.parameter.user_agent | string |  |   Default  iPhone 6 
 action_result.data.\*.AppURL | string |  `url`  |  
 action_result.data.\*.JobID | string |  `splunk attack analyzer job id`  |   63572265-c5ae-402f-9fc1-6c90547481XX 
 action_result.data.\*.QueueDepth | numeric |  |  
