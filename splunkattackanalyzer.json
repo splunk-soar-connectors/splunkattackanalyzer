@@ -15,11 +15,11 @@
         "Cloud, API: api.twinwave.io, API version: v1"
     ],
     "fips_compliant": true,
-    "app_version": "1.0.2",
+    "app_version": "1.1.0",
     "utctime_updated": "2023-07-13T21:57:43.000000Z",
     "package_name": "phantom_splunkattackanalyzer",
     "main_module": "splunkattackanalyzer_connector.py",
-    "min_phantom_version": "5.5.0",
+    "min_phantom_version": "6.1.0",
     "app_wizard_version": "1.0.0",
     "configuration": {
         "api_token": {
@@ -1716,13 +1716,6 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.data.*.HTTP.*.ResponseHeaders.test-action",
-                    "data_type": "string",
-                    "example_values": [
-                        "1"
-                    ]
-                },
-                {
                     "data_path": "action_result.data.*.HTTP.*.ResponseHeaders.location",
                     "data_type": "string",
                     "example_values": [
@@ -1857,6 +1850,13 @@
                     "data_type": "string",
                     "example_values": [
                         "max-age=31536000"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.HTTP.*.ResponseHeaders.test-action",
+                    "data_type": "string",
+                    "example_values": [
+                        "1"
                     ]
                 },
                 {
@@ -6012,17 +6012,17 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.message",
-                    "data_type": "string",
-                    "example_values": [
-                        "Job count: 11"
-                    ]
-                },
-                {
                     "data_path": "action_result.summary.job_count",
                     "data_type": "numeric",
                     "example_values": [
                         11
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Job count: 11"
                     ]
                 },
                 {
@@ -6061,6 +6061,51 @@
                         "vault id"
                     ],
                     "order": 0
+                },
+                "ph_0": {
+                    "description": "Placeholder",
+                    "data_type": "ph",
+                    "order": 1
+                },
+                "user_agent": {
+                    "description": "User agent for Web Analyzer runs (Select \"Custom\" to provide custom user agent)",
+                    "data_type": "string",
+                    "default": "Default",
+                    "value_list": [
+                        "Default",
+                        "Custom",
+                        "Desktop Chrome",
+                        "Desktop Edge",
+                        "Desktop Firefox",
+                        "Desktop Safari",
+                        "Galaxy S8",
+                        "iPhone 6",
+                        "iPhone 8",
+                        "iPhone 12",
+                        "Pixel 5"
+                    ],
+                    "order": 2
+                },
+                "internet_region": {
+                    "description": "GeoIP-based exit region for Web Analyzer runs",
+                    "data_type": "string",
+                    "value_list": [
+                        "US Residential",
+                        "US",
+                        "Asia",
+                        "Europe"
+                    ],
+                    "order": 3
+                },
+                "custom_user_agent": {
+                    "description": "Activated when user agent is \"Custom\"",
+                    "data_type": "string",
+                    "order": 4
+                },
+                "archive_password": {
+                    "description": "For password-protected archive files or for decrypting documents",
+                    "data_type": "string",
+                    "order": 5
                 }
             },
             "output": [
@@ -6073,6 +6118,17 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.parameter.archive_password",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.custom_user_agent",
+                    "data_type": "string",
+                    "example_values": [
+                        "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.file",
                     "data_type": "string",
                     "contains": [
@@ -6082,6 +6138,24 @@
                     "column_order": 0,
                     "example_values": [
                         "89b238c79f7752948b176222ae0010d0a1aa"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.internet_region",
+                    "data_type": "string",
+                    "column_name": "Internet Region",
+                    "column_order": 3,
+                    "example_values": [
+                        "US Residential",
+                        "US"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.user_agent",
+                    "data_type": "string",
+                    "example_values": [
+                        "Default",
+                        "iPhone 6"
                     ]
                 },
                 {
@@ -6160,6 +6234,54 @@
                     "required": true,
                     "primary": true,
                     "order": 0
+                },
+                "ph_0": {
+                    "description": "Placeholder",
+                    "data_type": "ph",
+                    "order": 1
+                },
+                "user_agent": {
+                    "description": "User agent for Web Analyzer runs (Select \"Custom\" to provide custom user agent)",
+                    "data_type": "string",
+                    "default": "Default",
+                    "value_list": [
+                        "Default",
+                        "Custom",
+                        "Desktop Chrome",
+                        "Desktop Edge",
+                        "Desktop Firefox",
+                        "Desktop Safari",
+                        "Galaxy S8",
+                        "iPhone 6",
+                        "iPhone 8",
+                        "iPhone 12",
+                        "Pixel 5",
+                        "Mobile",
+                        "iPhone X",
+                        "iPad (gen 7)"
+                    ],
+                    "order": 2
+                },
+                "internet_region": {
+                    "description": "GeoIP-based exit region for Web Analyzer runs",
+                    "data_type": "string",
+                    "value_list": [
+                        "US Residential",
+                        "US",
+                        "Asia",
+                        "Europe"
+                    ],
+                    "order": 3
+                },
+                "custom_user_agent": {
+                    "description": "Activated when user agent is \"Custom\"",
+                    "data_type": "string",
+                    "order": 4
+                },
+                "archive_password": {
+                    "description": "For password-protected archive files or for decrypting documents",
+                    "data_type": "string",
+                    "order": 5
                 }
             },
             "output": [
@@ -6172,6 +6294,27 @@
                     ]
                 },
                 {
+                    "data_path": "action_result.parameter.archive_password",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.custom_user_agent",
+                    "data_type": "string",
+                    "example_values": [
+                        "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.internet_region",
+                    "data_type": "string",
+                    "column_name": "Internet Region",
+                    "column_order": 3,
+                    "example_values": [
+                        "US Residential",
+                        "US"
+                    ]
+                },
+                {
                     "data_path": "action_result.parameter.url",
                     "data_type": "string",
                     "contains": [
@@ -6181,6 +6324,14 @@
                     "column_order": 0,
                     "example_values": [
                         "https://test_url.com"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.user_agent",
+                    "data_type": "string",
+                    "example_values": [
+                        "Default",
+                        "iPhone 6"
                     ]
                 },
                 {
@@ -6290,28 +6441,7 @@
             "versions": "EQ(*)"
         }
     ],
-    "pip_dependencies": {
-        "wheel": [
-            {
-                "module": "certifi",
-                "input_file": "wheels/py3/certifi-2022.12.7-py3-none-any.whl"
-            },
-            {
-                "module": "charset_normalizer",
-                "input_file": "wheels/py3/charset_normalizer-2.0.12-py3-none-any.whl"
-            },
-            {
-                "module": "idna",
-                "input_file": "wheels/py3/idna-3.4-py3-none-any.whl"
-            },
-            {
-                "module": "requests",
-                "input_file": "wheels/shared/requests-2.27.1-py2.py3-none-any.whl"
-            },
-            {
-                "module": "urllib3",
-                "input_file": "wheels/shared/urllib3-1.26.14-py2.py3-none-any.whl"
-            }
-        ]
+    "pip39_dependencies": {
+        "wheel": []
     }
 }

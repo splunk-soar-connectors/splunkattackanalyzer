@@ -49,6 +49,24 @@ def _make_resource_tree(resources):
     return root
 
 
+def _validate_internet_region_options(action_result, wa_exit_region):
+    # This function makes sure that - 'internet region' is selected from the dropdown menu only
+    if wa_exit_region not in list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys()):
+        return action_result.set_status(phantom.APP_ERROR,
+        SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.format
+        (list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys())))
+    return phantom.APP_SUCCESS
+
+
+def _validate_user_agent_options(action_result, user_agent):
+    # This function makes sure that - user-agent is selected from the dropdown menu only
+    if user_agent not in SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES:
+        return action_result.set_status(phantom.APP_ERROR,
+        SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE.format
+        (SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES))
+    return phantom.APP_SUCCESS
+
+
 def _validate_integer(action_result, parameter, key):
     """
     Validate an integer.
@@ -193,13 +211,50 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         try:
             file_id = params.get("file")
+            internet_region = params.get("internet_region")
+            user_agent = params.get("user_agent")
+            custom_user_agent = params.get("custom_user_agent")
+            archive_password = params.get("archive_password")
+
+            if internet_region is not None:
+                ret_val = _validate_internet_region_options(action_result, internet_region)
+                if phantom.is_fail(ret_val):
+                    self.save_progress(SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.
+                        format(list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys())))
+                    return action_result.get_status()
+            wa_exit_region = SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.get(internet_region)
+
+            saa_parameters = {}
+
+            if wa_exit_region:
+                saa_parameters["wa_exit_region"] = wa_exit_region
+
+            if archive_password:
+                saa_parameters["archive_document_password"] = archive_password
+
+            if user_agent:
+                if user_agent == "Default":
+                    # No need to set a parameter in this case, SAA will pick the default
+                    pass
+                elif user_agent == "Custom" or user_agent == "custom":
+                    if not custom_user_agent:
+                        return action_result.set_status(phantom.APP_ERROR, "Custom user agent needs to be provided as a parameter")
+                    saa_parameters["user_agent"] = custom_user_agent
+                else:
+                    ret_val = _validate_user_agent_options(action_result, user_agent)
+                    if phantom.is_fail(ret_val):
+                        self.save_progress(SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE.
+                            format(SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES))
+                        return action_result.get_status()
+                    saa_parameters["user_agent"] = f"alias:{user_agent}"
+
             success, message, info = vault.vault_info(vault_id=file_id)
             file_path = info[0]["path"]
             file_name = info[0]["name"]
             f = open(file_path, "rb")
             file_data = f.read()
             f.close()
-            submit_data = self._splunkattackanalyzer.submit_file(file_name, file_data)
+            submit_data = self._splunkattackanalyzer.submit_file(file_name, file_data, parameters=saa_parameters)
         except Exception as err:
             self.save_progress(str(err))
             return action_result.set_status(phantom.APP_ERROR, "Unable to submit file")
@@ -219,7 +274,44 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         try:
             url = params.get("url")
-            submit_data = self._splunkattackanalyzer.submit_url(url)
+            internet_region = params.get("internet_region")
+            user_agent = params.get("user_agent")
+            custom_user_agent = params.get("custom_user_agent")
+            archive_password = params.get("archive_password")
+
+            if internet_region is not None:
+                ret_val = _validate_internet_region_options(action_result, internet_region)
+                if phantom.is_fail(ret_val):
+                    self.save_progress(SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.
+                        format(list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys())))
+                    return action_result.get_status()
+            wa_exit_region = SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.get(internet_region)
+
+            saa_parameters = {}
+
+            if wa_exit_region:
+                saa_parameters["wa_exit_region"] = wa_exit_region
+
+            if archive_password:
+                saa_parameters["archive_document_password"] = archive_password
+
+            if user_agent:
+                if user_agent == "Custom" or user_agent == "custom":
+                    if not custom_user_agent:
+                        return action_result.set_status(phantom.APP_ERROR, "Custom user agent needs to be provided as a parameter")
+                    saa_parameters["user_agent"] = custom_user_agent
+                elif user_agent == "Default":
+                    # No need to set a parameter in this case, SAA will pick the default
+                    pass
+                else:
+                    ret_val = _validate_user_agent_options(action_result, user_agent)
+                    if phantom.is_fail(ret_val):
+                        self.save_progress(SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE.
+                            format(SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES))
+                        return action_result.get_status()
+                    saa_parameters["user_agent"] = f"alias:{user_agent}"
+
+            submit_data = self._splunkattackanalyzer.submit_url(url, parameters=saa_parameters)
         except Exception as e:
             self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
             return action_result.set_status(phantom.APP_ERROR, "Unable to submit url")
