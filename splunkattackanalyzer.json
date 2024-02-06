@@ -15,7 +15,7 @@
         "Cloud, API: api.twinwave.io, API version: v1"
     ],
     "fips_compliant": true,
-    "app_version": "1.2.0",
+    "app_version": "1.2.0-beta.1",
     "utctime_updated": "2023-07-13T21:57:43.000000Z",
     "package_name": "phantom_splunkattackanalyzer",
     "main_module": "splunkattackanalyzer_connector.py",
@@ -6112,6 +6112,11 @@
                     "description": "For password-protected archive files or for decrypting documents",
                     "data_type": "string",
                     "order": 5
+                },
+                "profile": {
+                    "description": "An optional profile name that defines the analysis behavior to be used during the analysis for this job",
+                    "data_type": "string",
+                    "order": 6
                 }
             },
             "output": [
@@ -6288,6 +6293,11 @@
                     "description": "For password-protected archive files or for decrypting documents",
                     "data_type": "string",
                     "order": 5
+                },
+                "profile": {
+                    "description": "An optional profile name that defines the analysis behavior to be used during the analysis for this job",
+                    "data_type": "string",
+                    "order": 6
                 }
             },
             "output": [

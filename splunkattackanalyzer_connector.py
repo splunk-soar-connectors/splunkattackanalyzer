@@ -217,6 +217,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             user_agent = params.get("user_agent")
             custom_user_agent = params.get("custom_user_agent")
             archive_password = params.get("archive_password")
+            profile = params.get("profile")
 
             if internet_region is not None:
                 ret_val = _validate_internet_region_options(action_result, internet_region)
@@ -256,12 +257,12 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             f = open(file_path, "rb")
             file_data = f.read()
             f.close()
-            submit_data = self._splunkattackanalyzer.submit_file(file_name, file_data, parameters=saa_parameters)
+            submit_data = self._splunkattackanalyzer.submit_file(file_name, file_data, parameters=saa_parameters, profile=profile)
         except Exception as err:
             self.save_progress(str(err))
             return action_result.set_status(phantom.APP_ERROR, "Unable to submit file")
 
-        submit_data["AppURL"] = "https://app.twinwave.io/job/{}".format(submit_data.get("JobID"))
+        submit_data["AppURL"] = "{}/job/{}".format(self._splunkattackanalyzer._app_url, submit_data.get("JobID"))
         action_result.add_data(submit_data)
         self.debug_print("results", dump_object=submit_data)
         return action_result.set_status(phantom.APP_SUCCESS, "Submitted file")
@@ -280,6 +281,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             user_agent = params.get("user_agent")
             custom_user_agent = params.get("custom_user_agent")
             archive_password = params.get("archive_password")
+            profile = params.get("profile")
 
             if internet_region is not None:
                 ret_val = _validate_internet_region_options(action_result, internet_region)
@@ -313,12 +315,12 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                         return action_result.get_status()
                     saa_parameters["user_agent"] = f"alias:{user_agent}"
 
-            submit_data = self._splunkattackanalyzer.submit_url(url, parameters=saa_parameters)
+            submit_data = self._splunkattackanalyzer.submit_url(url, parameters=saa_parameters, profile=profile)
         except Exception as e:
             self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
-            return action_result.set_status(phantom.APP_ERROR, "Unable to submit url")
+            return action_result.set_status(phantom.APP_ERROR, f"Unable to submit url: {self._get_error_message_from_exception(e)}")
 
-        submit_data["AppURL"] = "https://app.twinwave.io/job/{}".format(submit_data.get("JobID"))
+        submit_data["AppURL"] = "{}/job/{}".format(self._splunkattackanalyzer._app_url, submit_data.get("JobID"))
         action_result.add_data(submit_data)
         self.debug_print("results", dump_object=submit_data)
         return action_result.set_status(phantom.APP_SUCCESS, "Submitted URL")
