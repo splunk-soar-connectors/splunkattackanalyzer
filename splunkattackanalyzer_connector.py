@@ -476,9 +476,11 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             return action_result.get_status()
 
         job_summary["ResourceTree"] = _make_resource_tree(job_summary.get("Resources"))
+        app_url =  "{}/job/{}".format(self._splunkattackanalyzer._app_url, job_id)
 
         action_result.add_data(job_summary)
-        action_result.update_summary({"Job ID": job_id, "Score": job_summary.get("DisplayScore")})
+        action_result.update_summary({"Job ID": job_id, "Score": job_summary.get("DisplayScore"), "AppURL": app_url})
+
 
         self.save_progress("Job Summary Retrieved")
 
