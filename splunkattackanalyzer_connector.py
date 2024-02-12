@@ -1,6 +1,6 @@
 # File: splunkattackanalyzer_connector.py
 #
-# Copyright (c) 2023 Splunk Inc.
+# Copyright (c) 2023-2024 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -96,7 +96,6 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         # Call the BaseConnectors init first
         super(SplunkAttackAnalyzerConnector, self).__init__()
         self._state = None
-        self._base_url = None
 
     def initialize(self):
 
@@ -107,10 +106,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             self.debug_print("State file is corrupted, resetting the file")
         if not isinstance(self._state, dict):
             self.debug_print("State file is corrupted, resetting the file")
-            self.save_progresss("State file is corrupted, resetting the file")
+            self.save_progress("State file is corrupted, resetting the file")
             self._state = {"app_version": self.get_app_json().get("app_version")}
 
-        # Get the asset config from Phantom
         config = self.get_config()
         ret_val, config["since"] = _validate_integer(self, config.get("since", 24), "since")
         if phantom.is_fail(ret_val):
@@ -155,8 +153,6 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         self.save_progress("Connecting to endpoint")
-        self.save_progress(f"API URL: {self._splunkattackanalyzer._api_host}")
-        self.save_progress(f"App URL: {self._splunkattackanalyzer._app_url}")
 
         try:
             self._splunkattackanalyzer.get_engines()
@@ -476,11 +472,10 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             return action_result.get_status()
 
         job_summary["ResourceTree"] = _make_resource_tree(job_summary.get("Resources"))
-        app_url =  "{}/job/{}".format(self._splunkattackanalyzer._app_url, job_id)
+        app_url = "{}/job/{}".format(self._splunkattackanalyzer._app_url, job_id)
 
         action_result.add_data(job_summary)
         action_result.update_summary({"Job ID": job_id, "Score": job_summary.get("DisplayScore"), "AppURL": app_url})
-
 
         self.save_progress("Job Summary Retrieved")
 

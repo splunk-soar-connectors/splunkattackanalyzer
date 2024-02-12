@@ -15,7 +15,7 @@
         "Cloud, API: api.twinwave.io, API version: v1"
     ],
     "fips_compliant": true,
-    "app_version": "1.1.0",
+    "app_version": "1.2.0",
     "utctime_updated": "2023-07-13T21:57:43.000000Z",
     "package_name": "phantom_splunkattackanalyzer",
     "main_module": "splunkattackanalyzer_connector.py",
@@ -32,7 +32,7 @@
             "order": 1,
             "data_type": "string",
             "description": "App URL to access Attack Analyzer. If not specified, defaults to https://app.twinwave.io",
-            "required": false
+            "default": "https://app.twinwave.io"
         },
         "since": {
             "data_type": "numeric",
@@ -6133,6 +6133,10 @@
                     "data_type": "string"
                 },
                 {
+                    "data_path": "action_result.parameter.profile",
+                    "data_type": "string"
+                },
+                {
                     "data_path": "action_result.parameter.custom_user_agent",
                     "data_type": "string",
                     "example_values": [
@@ -6311,6 +6315,10 @@
                 },
                 {
                     "data_path": "action_result.parameter.archive_password",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.profile",
                     "data_type": "string"
                 },
                 {

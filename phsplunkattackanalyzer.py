@@ -1,6 +1,6 @@
 # File: phsplunkattackanalyzer.py
 #
-# Copyright (c) 2023 Splunk Inc.
+# Copyright (c) 2023-2024 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ class SplunkAttackAnalyzer:
         self._api_host = self._app_url.replace("app", "api")
         self._host = f"{self._api_host}/{API_VERSION}"
 
-        self._base_url = self._app_url
         self._api_key = config["api_token"]
         self._proxy = None
         self._verify = True
