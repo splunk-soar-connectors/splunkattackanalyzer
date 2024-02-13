@@ -22,17 +22,17 @@
     "min_phantom_version": "6.1.1",
     "app_wizard_version": "1.0.0",
     "configuration": {
+        "app_url": {
+            "order": 0,
+            "data_type": "string",
+            "description": "App URL to access Attack Analyzer. If not specified, defaults to https://app.twinwave.io",
+            "default": "https://app.twinwave.io"
+        },
         "api_token": {
             "description": "API token from the app",
             "data_type": "password",
             "required": true,
-            "order": 0
-        },
-        "app_url": {
-            "order": 1,
-            "data_type": "string",
-            "description": "App URL to access Attack Analyzer. If not specified, defaults to https://app.twinwave.io",
-            "default": "https://app.twinwave.io"
+            "order": 1
         },
         "since": {
             "data_type": "numeric",
@@ -6134,7 +6134,10 @@
                 },
                 {
                     "data_path": "action_result.parameter.profile",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "default"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.custom_user_agent",
@@ -6319,7 +6322,10 @@
                 },
                 {
                     "data_path": "action_result.parameter.profile",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "example_values": [
+                        "default"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.custom_user_agent",

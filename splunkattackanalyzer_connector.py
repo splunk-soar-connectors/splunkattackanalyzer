@@ -153,6 +153,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         self.save_progress("Connecting to endpoint")
+        self.save_progress(f"API URL: {self._splunkattackanalyzer._api_host}")
+        self.save_progress(f"App URL: {self._splunkattackanalyzer._app_url}")
 
         try:
             self._splunkattackanalyzer.get_engines()
