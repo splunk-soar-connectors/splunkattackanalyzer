@@ -32,7 +32,7 @@ class AuthenticationException(Exception):
 class SplunkAttackAnalyzer:
     def __init__(self, config):
         self._app_url = config.get("app_url", "https://app.twinwave.io")
-        self._api_host = self._app_url.replace("//app.", "//api.")
+        self._api_host = self._app_url.replace("app", "api")
         self._host = f"{self._api_host}/{API_VERSION}"
 
         self._api_key = config["api_token"]
