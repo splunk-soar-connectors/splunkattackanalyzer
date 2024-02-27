@@ -6126,6 +6126,7 @@
                     "description": "An optional profile name that defines the analysis behavior to be used during the analysis for this job",
                     "data_type": "string",
                     "order": 6,
+                    "primary": true,
                     "contains": [
                         "splunk attack analyzer profile"
                     ]
@@ -6320,6 +6321,7 @@
                     "description": "An optional profile name that defines the analysis behavior to be used during the analysis for this job",
                     "data_type": "string",
                     "order": 6,
+                    "primary": true,
                     "contains": [
                         "splunk attack analyzer profile"
                     ]
