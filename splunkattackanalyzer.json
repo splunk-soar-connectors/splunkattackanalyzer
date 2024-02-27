@@ -5587,10 +5587,10 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.summary.Verdict",
+                    "data_path": "action_result.summary.AppURL",
                     "data_type": "string",
                     "example_values": [
-                        "phish"
+                        "https://www.testdomain.com/job/1"
                     ]
                 },
                 {
