@@ -5591,6 +5591,9 @@
                     "data_type": "string",
                     "example_values": [
                         "https://www.testdomain.com/job/1"
+                    ],
+                    "contains": [
+                        "url"
                     ]
                 },
                 {
