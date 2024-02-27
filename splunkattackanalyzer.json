@@ -4012,7 +4012,10 @@
                 },
                 {
                     "data_path": "action_result.data.*.Profile",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "contains": [
+                        "splunk attack analyzer profile"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.RequestedEngines",
@@ -5747,6 +5750,9 @@
                 {
                     "data_path": "action_result.data.*.Profile",
                     "data_type": "string",
+                    "contains": [
+                        "splunk attack analyzer profile"
+                    ],
                     "example_values": [
                         "default"
                     ]
@@ -6119,7 +6125,10 @@
                 "profile": {
                     "description": "An optional profile name that defines the analysis behavior to be used during the analysis for this job",
                     "data_type": "string",
-                    "order": 6
+                    "order": 6,
+                    "contains": [
+                        "splunk attack analyzer profile"
+                    ]
                 }
             },
             "output": [
@@ -6138,6 +6147,9 @@
                 {
                     "data_path": "action_result.parameter.profile",
                     "data_type": "string",
+                    "contains": [
+                        "splunk attack analyzer profile"
+                    ],
                     "example_values": [
                         "default"
                     ]
@@ -6307,7 +6319,10 @@
                 "profile": {
                     "description": "An optional profile name that defines the analysis behavior to be used during the analysis for this job",
                     "data_type": "string",
-                    "order": 6
+                    "order": 6,
+                    "contains": [
+                        "splunk attack analyzer profile"
+                    ]
                 }
             },
             "output": [
@@ -6326,6 +6341,9 @@
                 {
                     "data_path": "action_result.parameter.profile",
                     "data_type": "string",
+                    "contains": [
+                        "splunk attack analyzer profile"
+                    ],
                     "example_values": [
                         "default"
                     ]
