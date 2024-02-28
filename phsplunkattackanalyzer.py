@@ -1,6 +1,6 @@
 # File: phsplunkattackanalyzer.py
 #
-# Copyright (c) 2023 Splunk Inc.
+# Copyright (c) 2023-2024 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import requests
 
 """ CONSTANTS """
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-API_HOST = "https://api.twinwave.io"
 API_VERSION = "v1"
 REQUEST_TIMEOUT = 60
 
@@ -32,8 +31,10 @@ class AuthenticationException(Exception):
 
 class SplunkAttackAnalyzer:
     def __init__(self, config):
-        self._host = f"{API_HOST}/{API_VERSION}"
-        self._base_url = "https://app.twinwave.io/"
+        self._app_url = config.get("app_url", "https://app.twinwave.io")
+        self._api_host = self._app_url.replace("app", "api")
+        self._host = f"{self._api_host}/{API_VERSION}"
+
         self._api_key = config["api_token"]
         self._proxy = None
         self._verify = True
