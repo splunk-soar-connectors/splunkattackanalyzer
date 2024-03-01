@@ -1,6 +1,6 @@
 # File: splunkattackanalyzer_connector.py
 #
-# Copyright (c) 2023 Splunk Inc.
+# Copyright (c) 2023-2024 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -96,7 +96,6 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         # Call the BaseConnectors init first
         super(SplunkAttackAnalyzerConnector, self).__init__()
         self._state = None
-        self._base_url = None
 
     def initialize(self):
 
@@ -107,10 +106,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             self.debug_print("State file is corrupted, resetting the file")
         if not isinstance(self._state, dict):
             self.debug_print("State file is corrupted, resetting the file")
-            self.save_progresss("State file is corrupted, resetting the file")
+            self.save_progress("State file is corrupted, resetting the file")
             self._state = {"app_version": self.get_app_json().get("app_version")}
 
-        # Get the asset config from Phantom
         config = self.get_config()
         ret_val, config["since"] = _validate_integer(self, config.get("since", 24), "since")
         if phantom.is_fail(ret_val):
@@ -149,12 +147,14 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
     def _handle_test_connectivity(self, param):
 
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.debug_print("In action handler for: {0}".format(self.get_action_identifier()))
 
         # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
         self.save_progress("Connecting to endpoint")
+        self.save_progress(f"API URL: {self._splunkattackanalyzer._api_host}")
+        self.save_progress(f"App URL: {self._splunkattackanalyzer._app_url}")
 
         try:
             self._splunkattackanalyzer.get_engines()
@@ -163,7 +163,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             # the call to the 3rd party device or service failed
             # action result should contain all the error details so just return from here
             error_message = self._get_error_message_from_exception(e)
-            self.debug_print(error_message)
+            self.save_progress("{}. {}".format("Connection to server failed",
+                                               error_message))
             self.save_progress("Test Connectivity Failed")
             return action_result.set_status(phantom.APP_ERROR)
 
@@ -215,6 +216,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             user_agent = params.get("user_agent")
             custom_user_agent = params.get("custom_user_agent")
             archive_password = params.get("archive_password")
+            profile = params.get("profile")
 
             if internet_region is not None:
                 ret_val = _validate_internet_region_options(action_result, internet_region)
@@ -254,12 +256,12 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             f = open(file_path, "rb")
             file_data = f.read()
             f.close()
-            submit_data = self._splunkattackanalyzer.submit_file(file_name, file_data, parameters=saa_parameters)
+            submit_data = self._splunkattackanalyzer.submit_file(file_name, file_data, parameters=saa_parameters, profile=profile)
         except Exception as err:
             self.save_progress(str(err))
             return action_result.set_status(phantom.APP_ERROR, "Unable to submit file")
 
-        submit_data["AppURL"] = "https://app.twinwave.io/job/{}".format(submit_data.get("JobID"))
+        submit_data["AppURL"] = "{}/job/{}".format(self._splunkattackanalyzer._app_url, submit_data.get("JobID"))
         action_result.add_data(submit_data)
         self.debug_print("results", dump_object=submit_data)
         return action_result.set_status(phantom.APP_SUCCESS, "Submitted file")
@@ -278,6 +280,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             user_agent = params.get("user_agent")
             custom_user_agent = params.get("custom_user_agent")
             archive_password = params.get("archive_password")
+            profile = params.get("profile")
 
             if internet_region is not None:
                 ret_val = _validate_internet_region_options(action_result, internet_region)
@@ -311,12 +314,12 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                         return action_result.get_status()
                     saa_parameters["user_agent"] = f"alias:{user_agent}"
 
-            submit_data = self._splunkattackanalyzer.submit_url(url, parameters=saa_parameters)
+            submit_data = self._splunkattackanalyzer.submit_url(url, parameters=saa_parameters, profile=profile)
         except Exception as e:
             self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
-            return action_result.set_status(phantom.APP_ERROR, "Unable to submit url")
+            return action_result.set_status(phantom.APP_ERROR, f"Unable to submit url: {self._get_error_message_from_exception(e)}")
 
-        submit_data["AppURL"] = "https://app.twinwave.io/job/{}".format(submit_data.get("JobID"))
+        submit_data["AppURL"] = "{}/job/{}".format(self._splunkattackanalyzer._app_url, submit_data.get("JobID"))
         action_result.add_data(submit_data)
         self.debug_print("results", dump_object=submit_data)
         return action_result.set_status(phantom.APP_SUCCESS, "Submitted URL")
@@ -472,9 +475,10 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             return action_result.get_status()
 
         job_summary["ResourceTree"] = _make_resource_tree(job_summary.get("Resources"))
+        app_url = "{}/job/{}".format(self._splunkattackanalyzer._app_url, job_id)
 
         action_result.add_data(job_summary)
-        action_result.update_summary({"Job ID": job_id, "Score": job_summary.get("DisplayScore")})
+        action_result.update_summary({"Job ID": job_id, "Score": job_summary.get("DisplayScore"), "AppURL": app_url})
 
         self.save_progress("Job Summary Retrieved")
 

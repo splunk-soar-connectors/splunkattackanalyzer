@@ -10,27 +10,33 @@
     "python_version": "3",
     "product_version_regex": ".*",
     "publisher": "Splunk",
-    "license": "Copyright (c) 2023 Splunk Inc.",
+    "license": "Copyright (c) 2023-2024 Splunk Inc.",
     "latest_tested_versions": [
         "Cloud, API: api.twinwave.io, API version: v1"
     ],
     "fips_compliant": true,
-    "app_version": "1.1.0",
+    "app_version": "1.2.0",
     "utctime_updated": "2023-07-13T21:57:43.000000Z",
     "package_name": "phantom_splunkattackanalyzer",
     "main_module": "splunkattackanalyzer_connector.py",
-    "min_phantom_version": "6.1.0",
+    "min_phantom_version": "6.1.1",
     "app_wizard_version": "1.0.0",
     "configuration": {
+        "app_url": {
+            "order": 0,
+            "data_type": "string",
+            "description": "App URL to access Attack Analyzer. If not specified, defaults to https://app.twinwave.io",
+            "default": "https://app.twinwave.io"
+        },
         "api_token": {
             "description": "API token from the app",
             "data_type": "password",
             "required": true,
-            "order": 0
+            "order": 1
         },
         "since": {
             "data_type": "numeric",
-            "order": 1,
+            "order": 2,
             "description": "Start of time range stated in hours. If not specified, the default is past 24 hours"
         }
     },
@@ -4006,7 +4012,10 @@
                 },
                 {
                     "data_path": "action_result.data.*.Profile",
-                    "data_type": "string"
+                    "data_type": "string",
+                    "contains": [
+                        "splunk attack analyzer profile"
+                    ]
                 },
                 {
                     "data_path": "action_result.data.*.RequestedEngines",
@@ -5581,10 +5590,13 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.summary.Verdict",
+                    "data_path": "action_result.summary.AppURL",
                     "data_type": "string",
                     "example_values": [
-                        "phish"
+                        "https://www.testdomain.com/job/1"
+                    ],
+                    "contains": [
+                        "url"
                     ]
                 },
                 {
@@ -5738,6 +5750,9 @@
                 {
                     "data_path": "action_result.data.*.Profile",
                     "data_type": "string",
+                    "contains": [
+                        "splunk attack analyzer profile"
+                    ],
                     "example_values": [
                         "default"
                     ]
@@ -6106,6 +6121,15 @@
                     "description": "For password-protected archive files or for decrypting documents",
                     "data_type": "string",
                     "order": 5
+                },
+                "profile": {
+                    "description": "An optional profile name that defines the analysis behavior to be used during the analysis for this job",
+                    "data_type": "string",
+                    "order": 6,
+                    "primary": true,
+                    "contains": [
+                        "splunk attack analyzer profile"
+                    ]
                 }
             },
             "output": [
@@ -6120,6 +6144,16 @@
                 {
                     "data_path": "action_result.parameter.archive_password",
                     "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.profile",
+                    "data_type": "string",
+                    "contains": [
+                        "splunk attack analyzer profile"
+                    ],
+                    "example_values": [
+                        "default"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.custom_user_agent",
@@ -6282,6 +6316,15 @@
                     "description": "For password-protected archive files or for decrypting documents",
                     "data_type": "string",
                     "order": 5
+                },
+                "profile": {
+                    "description": "An optional profile name that defines the analysis behavior to be used during the analysis for this job",
+                    "data_type": "string",
+                    "order": 6,
+                    "primary": true,
+                    "contains": [
+                        "splunk attack analyzer profile"
+                    ]
                 }
             },
             "output": [
@@ -6296,6 +6339,16 @@
                 {
                     "data_path": "action_result.parameter.archive_password",
                     "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.profile",
+                    "data_type": "string",
+                    "contains": [
+                        "splunk attack analyzer profile"
+                    ],
+                    "example_values": [
+                        "default"
+                    ]
                 },
                 {
                     "data_path": "action_result.parameter.custom_user_agent",

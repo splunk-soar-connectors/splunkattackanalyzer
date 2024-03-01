@@ -2,17 +2,17 @@
 # Splunk Attack Analyzer Connector for Splunk SOAR
 
 Publisher: Splunk  
-Connector Version: 1.1.0  
+Connector Version: 1.2.0  
 Product Vendor: Splunk  
 Product Name: Splunk Attack Analyzer  
 Product Version Supported (regex): ".\*"  
-Minimum Product Version: 6.1.0  
+Minimum Product Version: 6.1.1  
 
 This connector integrates with the Splunk Attack Analyzer platform to reduce the friction of repetitive manual tasks typically associated with investigating threats
 
 [comment]: # " File: README.md"
 [comment]: # ""
-[comment]: # "  Copyright (c) 2023 Splunk Inc."
+[comment]: # "  Copyright (c) 2023-2024 Splunk Inc."
 [comment]: # ""
 [comment]: # "  Licensed under the Apache License, Version 2.0 (the 'License');"
 [comment]: # "  you may not use this file except in compliance with the License."
@@ -87,6 +87,7 @@ The below configuration variables are required for this Connector to operate.  T
 
 VARIABLE | REQUIRED | TYPE | DESCRIPTION
 -------- | -------- | ---- | -----------
+**app_url** |  optional  | string | App URL to access Attack Analyzer. If not specified, defaults to https://app.twinwave.io
 **api_token** |  required  | password | API token from the app
 **since** |  optional  | numeric | Start of time range stated in hours. If not specified, the default is past 24 hours
 
@@ -822,7 +823,7 @@ action_result.data.\*.Parameters | string |  |
 action_result.data.\*.Parameters.\*.Name | string |  |   decode_rewritten_urls 
 action_result.data.\*.Parameters.\*.Value | string |  |   true 
 action_result.data.\*.Priority | numeric |  |  
-action_result.data.\*.Profile | string |  |  
+action_result.data.\*.Profile | string |  `splunk attack analyzer profile`  |  
 action_result.data.\*.RequestedEngines | string |  |  
 action_result.data.\*.ResourceCount | numeric |  |  
 action_result.data.\*.ResourceTree | string |  |  
@@ -1104,7 +1105,7 @@ action_result.data.\*.Verdict | string |  |
 action_result.summary | string |  |  
 action_result.summary.Job ID | string |  |   63572265-c5ae-402f-9fc1-6c90547482aa 
 action_result.summary.Score | numeric |  |   100 
-action_result.summary.Verdict | string |  |   phish 
+action_result.summary.AppURL | string |  `url`  |   https://www.testdomain.com/job/1 
 action_result.message | string |  |   Job ID: 63572265-c5ae-402f-9fc1-6c90547482aa, Score: 100, Verdict: phish 
 summary.total_objects | numeric |  |   1 
 summary.total_objects_successful | numeric |  |   1   
@@ -1138,7 +1139,7 @@ action_result.data.\*.Parameters | string |  |
 action_result.data.\*.Parameters.\*.Name | string |  |   decode_rewritten_urls 
 action_result.data.\*.Parameters.\*.Value | string |  |   true 
 action_result.data.\*.Priority | numeric |  |   10 
-action_result.data.\*.Profile | string |  |   default 
+action_result.data.\*.Profile | string |  `splunk attack analyzer profile`  |   default 
 action_result.data.\*.RequestedEngines | string |  |  
 action_result.data.\*.ResourceCount | numeric |  |   8 
 action_result.data.\*.Resources.\*.CreatedAt | string |  |   2023-02-24T10:40:29.058Z 
@@ -1205,12 +1206,14 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **internet_region** |  optional  | GeoIP-based exit region for Web Analyzer runs | string | 
 **custom_user_agent** |  optional  | Activated when user agent is "Custom" | string | 
 **archive_password** |  optional  | For password-protected archive files or for decrypting documents | string | 
+**profile** |  optional  | An optional profile name that defines the analysis behavior to be used during the analysis for this job | string |  `splunk attack analyzer profile` 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
 action_result.status | string |  |   success  failed 
 action_result.parameter.archive_password | string |  |  
+action_result.parameter.profile | string |  `splunk attack analyzer profile`  |   default 
 action_result.parameter.custom_user_agent | string |  |   Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0 
 action_result.parameter.file | string |  `vault id`  |   89b238c79f7752948b176222ae0010d0a1aa 
 action_result.parameter.internet_region | string |  |   US Residential  US 
@@ -1238,12 +1241,14 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **internet_region** |  optional  | GeoIP-based exit region for Web Analyzer runs | string | 
 **custom_user_agent** |  optional  | Activated when user agent is "Custom" | string | 
 **archive_password** |  optional  | For password-protected archive files or for decrypting documents | string | 
+**profile** |  optional  | An optional profile name that defines the analysis behavior to be used during the analysis for this job | string |  `splunk attack analyzer profile` 
 
 #### Action Output
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
 action_result.status | string |  |   success  failed 
 action_result.parameter.archive_password | string |  |  
+action_result.parameter.profile | string |  `splunk attack analyzer profile`  |   default 
 action_result.parameter.custom_user_agent | string |  |   Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0 
 action_result.parameter.internet_region | string |  |   US Residential  US 
 action_result.parameter.url | string |  `url`  |   https://test_url.com 
