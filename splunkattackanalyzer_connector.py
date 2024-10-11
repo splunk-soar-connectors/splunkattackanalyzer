@@ -557,6 +557,40 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
+    def _handle_splunk_attack_analyzer_get_job_system_tags(self, params):
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+
+        action_result = self.add_action_result(ActionResult(dict(params)))
+
+        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout")
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+
+        job_id = params["job_id"]
+
+        job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+
+        # Ensure completion of job
+        if job_summary["State"] == "inprogress":
+            return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_JOB_STATE.format("get system tags"))
+
+        system_tags = []
+        for label in job_summary.get("Labels", []):
+            if label.get("Type") == "system_tag":
+                system_tags.append(label.get("Value"))
+                action_result.add_data(label)
+
+        summary = {
+            "job_id": job_id,
+            "total_system_tags": len(system_tags),
+            "requires_manual_review": any(tag in system_tags for tag in SPLUNK_ATTACK_ANALYZER_SYSTEM_TAGS),
+        }
+        action_result.update_summary(summary)
+
+        return action_result.set_status(phantom.APP_SUCCESS, "Successfully retrieved system tags")
+
     def handle_action(self, param):
 
         ret_val = phantom.APP_SUCCESS
@@ -582,6 +616,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             ret_val = self._handle_splunk_attack_analyzer_get_job_pdf(param)
         elif action_id == "splunk_attack_analyzer_get_job_screenshots":
             ret_val = self._handle_splunk_attack_analyzer_get_job_screenshots(param)
+        elif action_id == "splunk_attack_analyzer_get_job_system_tags":
+            ret_val = self._handle_splunk_attack_analyzer_get_job_system_tags(param)
         elif action_id == "on_poll":
             ret_val = self._handle_on_poll(param)
         return ret_val
