@@ -76,7 +76,7 @@ SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS = {
     "United Arab Emirates": "ae",
     "Venezuela": "ve",
     "Vietnam": "vn",
-    "South Africa": "za"
+    "South Africa": "za",
 }
 
 # Update this if user-agent dropdown is updated
@@ -89,13 +89,7 @@ SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES = [
     "iPhone 6",
     "iPhone 8",
     "iPhone 12",
-    "Pixel 5"
+    "Pixel 5",
 ]
 
-SPLUNK_ATTACK_ANALYZER_SYSTEM_TAGS = [
-    "password_not_cracked",
-    "file_too_large",
-    "terminal_captcha",
-    "terminal_login",
-    "phishing_simulation"
-]
+SPLUNK_ATTACK_ANALYZER_SYSTEM_TAGS = ["password_not_cracked", "file_too_large", "terminal_captcha", "terminal_login", "phishing_simulation"]

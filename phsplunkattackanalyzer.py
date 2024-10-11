@@ -147,8 +147,9 @@ class SplunkAttackAnalyzer:
         payload["profile"] = profile
         payload["parameters"] = json.dumps(self.format_parameters_for_submission(parameters))
 
-        resp = requests.post(url, data=payload, files=file_dict, headers=self.get_header(), verify=self._verify, proxies=self._proxy,
-            timeout=REQUEST_TIMEOUT)
+        resp = requests.post(
+            url, data=payload, files=file_dict, headers=self.get_header(), verify=self._verify, proxies=self._proxy, timeout=REQUEST_TIMEOUT
+        )
         resp.raise_for_status()
         return resp.json()
 

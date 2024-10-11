@@ -19,7 +19,7 @@
     "utctime_updated": "2023-07-13T21:57:43.000000Z",
     "package_name": "phantom_splunkattackanalyzer",
     "main_module": "splunkattackanalyzer_connector.py",
-    "min_phantom_version": "6.1.1",
+    "min_phantom_version": "6.2.1",
     "app_wizard_version": "1.0.0",
     "configuration": {
         "app_url": {
@@ -6546,7 +6546,7 @@
             "versions": "EQ(*)"
         },
         {
-            "action": "get job system tags",
+            "action": "get job tags",
             "identifier": "splunk_attack_analyzer_get_job_system_tags",
             "description": "Retrieve system tags for a specific job",
             "type": "investigate",

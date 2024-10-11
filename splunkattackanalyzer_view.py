@@ -13,6 +13,7 @@
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 
+
 def _tree_order_resources(current_node, ordered_resources=None, depth=0):
     if not ordered_resources:
         ordered_resources = []
