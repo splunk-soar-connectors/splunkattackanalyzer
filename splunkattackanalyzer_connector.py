@@ -15,6 +15,7 @@
 
 import json
 import sys
+
 # Phantom App imports
 import time
 from datetime import datetime
@@ -52,18 +53,18 @@ def _make_resource_tree(resources):
 def _validate_internet_region_options(action_result, wa_exit_region):
     # This function makes sure that - 'internet region' is selected from the dropdown menu only
     if wa_exit_region not in list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys()):
-        return action_result.set_status(phantom.APP_ERROR,
-        SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.format
-        (list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys())))
+        return action_result.set_status(
+            phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.format(list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys()))
+        )
     return phantom.APP_SUCCESS
 
 
 def _validate_user_agent_options(action_result, user_agent):
     # This function makes sure that - user-agent is selected from the dropdown menu only
     if user_agent not in SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES:
-        return action_result.set_status(phantom.APP_ERROR,
-        SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE.format
-        (SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES))
+        return action_result.set_status(
+            phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE.format(SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES)
+        )
     return phantom.APP_SUCCESS
 
 
@@ -120,7 +121,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         return phantom.APP_SUCCESS
 
     def _get_error_message_from_exception(self, e):
-        """ This method is used to get appropriate error message from the exception.
+        """This method is used to get appropriate error message from the exception.
         :param e: Exception object
         :return: error message
         """
@@ -163,8 +164,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             # the call to the 3rd party device or service failed
             # action result should contain all the error details so just return from here
             error_message = self._get_error_message_from_exception(e)
-            self.save_progress("{}. {}".format("Connection to server failed",
-                                               error_message))
+            self.save_progress("{}. {}".format("Connection to server failed", error_message))
             self.save_progress("Test Connectivity Failed")
             return action_result.set_status(phantom.APP_ERROR)
 
@@ -221,8 +221,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             if internet_region is not None:
                 ret_val = _validate_internet_region_options(action_result, internet_region)
                 if phantom.is_fail(ret_val):
-                    self.save_progress(SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.
-                        format(list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys())))
+                    self.save_progress(
+                        SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.format(list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys()))
+                    )
                     return action_result.get_status()
             wa_exit_region = SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.get(internet_region)
 
@@ -245,8 +246,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                 else:
                     ret_val = _validate_user_agent_options(action_result, user_agent)
                     if phantom.is_fail(ret_val):
-                        self.save_progress(SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE.
-                            format(SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES))
+                        self.save_progress(
+                            SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE.format(SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES)
+                        )
                         return action_result.get_status()
                     saa_parameters["user_agent"] = f"alias:{user_agent}"
 
@@ -285,8 +287,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             if internet_region is not None:
                 ret_val = _validate_internet_region_options(action_result, internet_region)
                 if phantom.is_fail(ret_val):
-                    self.save_progress(SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.
-                        format(list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys())))
+                    self.save_progress(
+                        SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE.format(list(SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.keys()))
+                    )
                     return action_result.get_status()
             wa_exit_region = SPLUNK_ATTACK_ANALYZER_EXIT_REGIONS.get(internet_region)
 
@@ -309,8 +312,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                 else:
                     ret_val = _validate_user_agent_options(action_result, user_agent)
                     if phantom.is_fail(ret_val):
-                        self.save_progress(SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE.
-                            format(SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES))
+                        self.save_progress(
+                            SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE.format(SPLUNK_ATTACK_ANALYZER_ACCEPTED_USER_AGENT_VALUES)
+                        )
                         return action_result.get_status()
                     saa_parameters["user_agent"] = f"alias:{user_agent}"
 
@@ -422,7 +426,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                             "fileHash": resource["FileMetadata"]["SHA256"],
                             "fileSize": resource["FileMetadata"]["Size"],
                             "fileType": resource["FileMetadata"]["MimeType"],
-                            "data": resource
+                            "data": resource,
                         },
                         "label": "file",
                         "name": resource["Name"],
@@ -466,9 +470,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             return action_result.get_status()
         job_id = params["job_id"]
 
-        self.debug_print(
-            "Getting summary for job ID: {}, timeout: {}".format(job_id, timeout_in_minutes)
-        )
+        self.debug_print("Getting summary for job ID: {}, timeout: {}".format(job_id, timeout_in_minutes))
 
         job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes)
         if phantom.is_fail(ret_val):
@@ -557,6 +559,42 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
+    def _handle_splunk_attack_analyzer_get_job_system_tags(self, params):
+        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+
+        action_result = self.add_action_result(ActionResult(dict(params)))
+
+        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout")
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+
+        job_id = params["job_id"]
+
+        job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+
+        # Ensure completion of job
+        if job_summary["State"] == "inprogress":
+            return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_JOB_STATE.format("get system tags"))
+
+        system_tags = []
+        for label in job_summary.get("Labels", []):
+            if label.get("Type") == "system_tag":
+                system_tags.append(label.get("Value"))
+                action_result.add_data(label)
+
+        summary = {
+            "job_id": job_id,
+            "total_system_tags": len(system_tags),
+            "requires_manual_review": any(tag in system_tags for tag in SPLUNK_ATTACK_ANALYZER_SYSTEM_TAGS),
+        }
+        action_result.update_summary(summary)
+
+        self.save_progress("Successfully retrieved system tags")
+
+        return action_result.set_status(phantom.APP_SUCCESS, "Successfully retrieved system tags")
+
     def handle_action(self, param):
 
         ret_val = phantom.APP_SUCCESS
@@ -582,6 +620,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             ret_val = self._handle_splunk_attack_analyzer_get_job_pdf(param)
         elif action_id == "splunk_attack_analyzer_get_job_screenshots":
             ret_val = self._handle_splunk_attack_analyzer_get_job_screenshots(param)
+        elif action_id == "splunk_attack_analyzer_get_job_system_tags":
+            ret_val = self._handle_splunk_attack_analyzer_get_job_system_tags(param)
         elif action_id == "on_poll":
             ret_val = self._handle_on_poll(param)
         return ret_val
@@ -597,10 +637,10 @@ def main():
 
     argparser = argparse.ArgumentParser()
 
-    argparser.add_argument('input_test_json', help='Input Test JSON file')
-    argparser.add_argument('-u', '--username', help='username', required=False)
-    argparser.add_argument('-p', '--password', help='password', required=False)
-    argparser.add_argument('-v', '--verify', action='store_true', help='verify', required=False, default=False)
+    argparser.add_argument("input_test_json", help="Input Test JSON file")
+    argparser.add_argument("-u", "--username", help="username", required=False)
+    argparser.add_argument("-p", "--password", help="password", required=False)
+    argparser.add_argument("-v", "--verify", action="store_true", help="verify", required=False, default=False)
 
     args = argparser.parse_args()
     session_id = None
@@ -613,28 +653,29 @@ def main():
 
         # User specified a username but not a password, so ask
         import getpass
+
         password = getpass.getpass("Password: ")
 
     if username and password:
         try:
-            login_url = SplunkAttackAnalyzerConnector._get_phantom_base_url() + '/login'
+            login_url = SplunkAttackAnalyzerConnector._get_phantom_base_url() + "/login"
 
             print("Accessing the Login page")
             r = requests.get(login_url, verify=verify, timeout=30)
-            csrftoken = r.cookies['csrftoken']
+            csrftoken = r.cookies["csrftoken"]
 
             data = dict()
-            data['username'] = username
-            data['password'] = password
-            data['csrfmiddlewaretoken'] = csrftoken
+            data["username"] = username
+            data["password"] = password
+            data["csrfmiddlewaretoken"] = csrftoken
 
             headers = dict()
-            headers['Cookie'] = 'csrftoken=' + csrftoken
-            headers['Referer'] = login_url
+            headers["Cookie"] = "csrftoken=" + csrftoken
+            headers["Referer"] = login_url
 
             print("Logging into Platform to get the session id")
             r2 = requests.post(login_url, verify=verify, data=data, headers=headers, timeout=30)
-            session_id = r2.cookies['sessionid']
+            session_id = r2.cookies["sessionid"]
         except Exception as e:
             print("Unable to get session id from the platform. Error: " + str(e))
             sys.exit(1)
@@ -648,8 +689,8 @@ def main():
         connector.print_progress_message = True
 
         if session_id is not None:
-            in_json['user_session_token'] = session_id
-            connector._set_csrf_info(csrftoken, headers['Referer'])
+            in_json["user_session_token"] = session_id
+            connector._set_csrf_info(csrftoken, headers["Referer"])
 
         ret_val = connector._handle_action(json.dumps(in_json), None)
         print(json.dumps(json.loads(ret_val), indent=4))
@@ -657,5 +698,5 @@ def main():
     sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

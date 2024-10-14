@@ -19,7 +19,7 @@
     "utctime_updated": "2023-07-13T21:57:43.000000Z",
     "package_name": "phantom_splunkattackanalyzer",
     "main_module": "splunkattackanalyzer_connector.py",
-    "min_phantom_version": "6.1.1",
+    "min_phantom_version": "6.2.1",
     "app_wizard_version": "1.0.0",
     "configuration": {
         "app_url": {
@@ -6108,7 +6108,56 @@
                         "US Residential",
                         "US",
                         "Asia",
-                        "Europe"
+                        "Europe",
+                        "Argentina",
+                        "Australia",
+                        "Bangladesh",
+                        "Bulgaria",
+                        "Brazil",
+                        "Belarus",
+                        "Canada",
+                        "Chile",
+                        "China",
+                        "Colombia",
+                        "Germany",
+                        "Dominican Republic",
+                        "Algeria",
+                        "Ecuador",
+                        "Egypt",
+                        "Spain",
+                        "France",
+                        "United Kingdom",
+                        "Greece",
+                        "Hungary",
+                        "Indonesia",
+                        "Ireland",
+                        "Israel",
+                        "India",
+                        "Italy",
+                        "Japan",
+                        "Korea",
+                        "Kazakhstan",
+                        "Morocco",
+                        "Mexico",
+                        "Malaysia",
+                        "Nigeria",
+                        "Netherlands",
+                        "Peru",
+                        "Philippines",
+                        "Pakistan",
+                        "Poland",
+                        "Romania",
+                        "Serbia",
+                        "Russian Federation",
+                        "Saudi Arabia",
+                        "Thailand",
+                        "Turkey",
+                        "Taiwan",
+                        "Ukraine",
+                        "United Arab Emirates",
+                        "Venezuela",
+                        "Vietnam",
+                        "South Africa"
                     ],
                     "order": 3
                 },
@@ -6303,7 +6352,56 @@
                         "US Residential",
                         "US",
                         "Asia",
-                        "Europe"
+                        "Europe",
+                        "Argentina",
+                        "Australia",
+                        "Bangladesh",
+                        "Bulgaria",
+                        "Brazil",
+                        "Belarus",
+                        "Canada",
+                        "Chile",
+                        "China",
+                        "Colombia",
+                        "Germany",
+                        "Dominican Republic",
+                        "Algeria",
+                        "Ecuador",
+                        "Egypt",
+                        "Spain",
+                        "France",
+                        "United Kingdom",
+                        "Greece",
+                        "Hungary",
+                        "Indonesia",
+                        "Ireland",
+                        "Israel",
+                        "India",
+                        "Italy",
+                        "Japan",
+                        "Korea",
+                        "Kazakhstan",
+                        "Morocco",
+                        "Mexico",
+                        "Malaysia",
+                        "Nigeria",
+                        "Netherlands",
+                        "Peru",
+                        "Philippines",
+                        "Pakistan",
+                        "Poland",
+                        "Romania",
+                        "Serbia",
+                        "Russian Federation",
+                        "Saudi Arabia",
+                        "Thailand",
+                        "Turkey",
+                        "Taiwan",
+                        "Ukraine",
+                        "United Arab Emirates",
+                        "Venezuela",
+                        "Vietnam",
+                        "South Africa"
                     ],
                     "order": 3
                 },
@@ -6426,6 +6524,91 @@
                     "example_values": [
                         "Submitted URL"
                     ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                }
+            ],
+            "render": {
+                "type": "table"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "get job tags",
+            "identifier": "splunk_attack_analyzer_get_job_system_tags",
+            "description": "Retrieve system tags for a specific job",
+            "type": "investigate",
+            "read_only": true,
+            "parameters": {
+                "job_id": {
+                    "description": "Job ID to retrieve system tags for",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": true,
+                    "contains": [
+                        "splunk attack analyzer job id"
+                    ],
+                    "order": 0
+                },
+                "timeout": {
+                    "description": "Maximum time (in minutes) to wait for job to be completed",
+                    "data_type": "numeric",
+                    "order": 1
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.job_id",
+                    "data_type": "string",
+                    "contains": [
+                        "splunk attack analyzer job id"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.timeout",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.Value",
+                    "data_type": "string",
+                    "column_name": "System Tags",
+                    "column_order": 0
+                },
+                {
+                    "data_path": "action_result.data.*.Type",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.summary.job_id",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.summary.total_system_tags",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.summary.requires_manual_review",
+                    "data_type": "boolean"
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string"
                 },
                 {
                     "data_path": "summary.total_objects",

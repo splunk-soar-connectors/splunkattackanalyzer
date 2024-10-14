@@ -6,7 +6,7 @@ Connector Version: 1.2.0
 Product Vendor: Splunk  
 Product Name: Splunk Attack Analyzer  
 Product Version Supported (regex): ".\*"  
-Minimum Product Version: 6.1.1  
+Minimum Product Version: 6.2.1  
 
 This connector integrates with the Splunk Attack Analyzer platform to reduce the friction of repetitive manual tasks typically associated with investigating threats
 
@@ -99,6 +99,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 [list recent jobs](#action-list-recent-jobs) - Get a list of recent jobs  
 [detonate file](#action-detonate-file) - Submit File for Scanning  
 [detonate url](#action-detonate-url) - Submit New URL for Scanning  
+[get job tags](#action-get-job-tags) - Retrieve system tags for a specific job  
 [on poll](#action-on-poll) - Callback action for the on_poll ingest functionality  
 [test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity using supplied configuration  
 
@@ -1259,6 +1260,33 @@ action_result.data.\*.QueueDepth | numeric |  |
 action_result.data.\*.QuotaRemaining | numeric |  |  
 action_result.summary | string |  |  
 action_result.message | string |  |   Submitted URL 
+summary.total_objects | numeric |  |   1 
+summary.total_objects_successful | numeric |  |   1   
+
+## action: 'get job tags'
+Retrieve system tags for a specific job
+
+Type: **investigate**  
+Read only: **True**
+
+#### Action Parameters
+PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
+--------- | -------- | ----------- | ---- | --------
+**job_id** |  required  | Job ID to retrieve system tags for | string |  `splunk attack analyzer job id` 
+**timeout** |  optional  | Maximum time (in minutes) to wait for job to be completed | numeric | 
+
+#### Action Output
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string |  |  
+action_result.parameter.job_id | string |  `splunk attack analyzer job id`  |  
+action_result.parameter.timeout | numeric |  |  
+action_result.data.\*.Value | string |  |  
+action_result.data.\*.Type | string |  |  
+action_result.summary.job_id | string |  |  
+action_result.summary.total_system_tags | numeric |  |  
+action_result.summary.requires_manual_review | boolean |  |  
+action_result.message | string |  |  
 summary.total_objects | numeric |  |   1 
 summary.total_objects_successful | numeric |  |   1   
 
