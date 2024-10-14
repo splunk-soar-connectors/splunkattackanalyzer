@@ -15,8 +15,8 @@
         "Cloud, API: api.twinwave.io, API version: v1"
     ],
     "fips_compliant": true,
-    "app_version": "1.2.0",
-    "utctime_updated": "2023-07-13T21:57:43.000000Z",
+    "app_version": "1.2.1",
+    "utctime_updated": "2024-10-14T22:08:53.000000Z",
     "package_name": "phantom_splunkattackanalyzer",
     "main_module": "splunkattackanalyzer_connector.py",
     "min_phantom_version": "6.2.1",
