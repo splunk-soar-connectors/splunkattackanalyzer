@@ -6546,7 +6546,7 @@
             "versions": "EQ(*)"
         },
         {
-            "action": "get job tags",
+            "action": "get system tags",
             "identifier": "splunk_attack_analyzer_get_job_system_tags",
             "description": "Retrieve system tags for a specific job",
             "type": "investigate",
