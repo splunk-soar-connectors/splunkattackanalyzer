@@ -2,7 +2,7 @@
 # Splunk Attack Analyzer Connector for Splunk SOAR
 
 Publisher: Splunk  
-Connector Version: 1.3.0  
+Connector Version: 2.0.0  
 Product Vendor: Splunk  
 Product Name: Splunk Attack Analyzer  
 Product Version Supported (regex): ".\*"  
@@ -99,7 +99,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 [list recent jobs](#action-list-recent-jobs) - Get a list of recent jobs  
 [detonate file](#action-detonate-file) - Submit File for Scanning  
 [detonate url](#action-detonate-url) - Submit New URL for Scanning  
-[get job tags](#action-get-job-tags) - Retrieve system tags for a specific job  
+[get system tags](#action-get-system-tags) - Retrieve system tags for a specific job  
 [on poll](#action-on-poll) - Callback action for the on_poll ingest functionality  
 [test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity using supplied configuration  
 
@@ -1263,7 +1263,7 @@ action_result.message | string |  |   Submitted URL
 summary.total_objects | numeric |  |   1 
 summary.total_objects_successful | numeric |  |   1   
 
-## action: 'get job tags'
+## action: 'get system tags'
 Retrieve system tags for a specific job
 
 Type: **investigate**  
