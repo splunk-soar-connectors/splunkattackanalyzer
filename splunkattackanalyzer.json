@@ -10,7 +10,7 @@
     "python_version": "3",
     "product_version_regex": ".*",
     "publisher": "Splunk",
-    "license": "Copyright (c) 2023-2024 Splunk Inc.",
+    "license": "Copyright (c) 2023-2025 Splunk Inc.",
     "latest_tested_versions": [
         "Cloud, API: api.twinwave.io, API version: v1"
     ],
@@ -6294,6 +6294,10 @@
                     "example_values": [
                         1
                     ]
+                },
+                {
+                    "data_path": "action_result.parameter.ph_0",
+                    "data_type": "ph"
                 }
             ],
             "render": {
@@ -6538,6 +6542,10 @@
                     "example_values": [
                         1
                     ]
+                },
+                {
+                    "data_path": "action_result.parameter.ph_0",
+                    "data_type": "ph"
                 }
             ],
             "render": {

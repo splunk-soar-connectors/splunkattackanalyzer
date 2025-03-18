@@ -1,6 +1,6 @@
 # File: splunkattackanalyzer_connector.py
 #
-# Copyright (c) 2023-2024 Splunk Inc.
+# Copyright (c) 2023-2025 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,12 +33,11 @@ from splunkattackanalyzer_consts import *
 
 class RetVal(tuple):
     def __new__(cls, val1, val2=None):
-
         return tuple.__new__(RetVal, (val1, val2))
 
 
 def _make_resource_tree(resources):
-    root = [root_resource for root_resource in resources if not root_resource["ParentID"]][0]
+    root = next(root_resource for root_resource in resources if not root_resource["ParentID"])
 
     def _get_children(root_resource, resources):
         root_resource["Children"] = [child_resource for child_resource in resources if child_resource["ParentID"] == root_resource["ID"]]
@@ -93,13 +92,11 @@ def _validate_integer(action_result, parameter, key):
 
 class SplunkAttackAnalyzerConnector(BaseConnector):
     def __init__(self):
-
         # Call the BaseConnectors init first
-        super(SplunkAttackAnalyzerConnector, self).__init__()
+        super().__init__()
         self._state = None
 
     def initialize(self):
-
         # Load the state in initialize, use it to store data that needs to be accessed across actions
         try:
             self._state = self.load_state()
@@ -139,7 +136,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         except:
             pass
 
-        return "Error Code: {0}. Error Message: {1}".format(error_code, error_message)
+        return f"Error Code: {error_code}. Error Message: {error_message}"
 
     def _add_to_vault(self, data, filename):
         # this temp directory uses "V" since this function is from the CLASS instance not the same as the "v" vault instance
@@ -147,8 +144,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         return Vault.create_attachment(data, container_id, file_name=filename)
 
     def _handle_test_connectivity(self, param):
-
-        self.debug_print("In action handler for: {0}".format(self.get_action_identifier()))
+        self.debug_print(f"In action handler for: {self.get_action_identifier()}")
 
         # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
@@ -173,8 +169,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_splunk_attack_analyzer_get_job_normalized_forensics(self, params):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
@@ -192,19 +187,17 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_JOB_STATE.format("find job forensics"))
 
         try:
-
             job_fore = self._splunkattackanalyzer.get_job_normalized_forensics(job_id)
 
         except Exception as e:
-            self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
+            self.debug_print(f"Exception occured: {self._get_error_message_from_exception(e)}")
             return action_result.set_status(phantom.APP_ERROR, "Unable to retrieve forensics")
 
         action_result.add_data(job_fore)
         return action_result.set_status(phantom.APP_SUCCESS, "Job normal forensics retrieved")
 
     def _handle_splunk_attack_analyzer_submit_file(self, params):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
@@ -269,8 +262,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS, "Submitted file")
 
     def _handle_splunk_attack_analyzer_submit_url(self, params):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
@@ -320,7 +312,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
             submit_data = self._splunkattackanalyzer.submit_url(url, parameters=saa_parameters, profile=profile)
         except Exception as e:
-            self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
+            self.debug_print(f"Exception occured: {self._get_error_message_from_exception(e)}")
             return action_result.set_status(phantom.APP_ERROR, f"Unable to submit url: {self._get_error_message_from_exception(e)}")
 
         submit_data["AppURL"] = "{}/job/{}".format(self._splunkattackanalyzer._app_url, submit_data.get("JobID"))
@@ -329,8 +321,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS, "Submitted URL")
 
     def _handle_splunk_attack_analyzer_list_recent_jobs(self, params):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
@@ -344,7 +335,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             action_result.append_to_message("Gathered recent jobs")
             action_result.update_summary({"job_count": len(job_list)})
         except Exception as e:
-            self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
+            self.debug_print(f"Exception occured: {self._get_error_message_from_exception(e)}")
             return action_result.set_status(phantom.APP_ERROR, "Unable to get jobs")
 
         for data in job_list:
@@ -352,8 +343,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_on_poll(self, params):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         manual_polling = self.is_poll_now()
 
@@ -379,7 +369,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         try:
             payload = self._splunkattackanalyzer.poll_for_done_jobs(limit, datetime_checkpoint)
         except Exception as e:
-            self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
+            self.debug_print(f"Exception occured: {self._get_error_message_from_exception(e)}")
             return action_result.set_status(phantom.APP_ERROR, "Unable to get jobs")
         if payload:
             for job in payload:
@@ -437,8 +427,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         ret_val, msg, cid = self.save_container(container)
         if phantom.is_fail(ret_val):
-            self.save_progress("Error saving container: {}".format(msg))
-            self.debug_print("Error saving container: {} -- CID: {}".format(msg, cid))
+            self.save_progress(f"Error saving container: {msg}")
+            self.debug_print(f"Error saving container: {msg} -- CID: {cid}")
 
     def _get_job_data(self, action_result, job_id, timeout_in_minutes):
         start_time = time.time()
@@ -457,11 +447,10 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                     return None, action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_TIMEOUT_ERROR)
             except Exception as e:
                 error_message = self._get_error_message_from_exception(e)
-                return None, action_result.set_status(phantom.APP_ERROR, "Exception occured: {}".format(error_message))
+                return None, action_result.set_status(phantom.APP_ERROR, f"Exception occured: {error_message}")
 
     def _handle_splunk_attack_analyzer_get_job_summary(self, params):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
@@ -470,14 +459,14 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             return action_result.get_status()
         job_id = params["job_id"]
 
-        self.debug_print("Getting summary for job ID: {}, timeout: {}".format(job_id, timeout_in_minutes))
+        self.debug_print(f"Getting summary for job ID: {job_id}, timeout: {timeout_in_minutes}")
 
         job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         job_summary["ResourceTree"] = _make_resource_tree(job_summary.get("Resources"))
-        app_url = "{}/job/{}".format(self._splunkattackanalyzer._app_url, job_id)
+        app_url = f"{self._splunkattackanalyzer._app_url}/job/{job_id}"
 
         action_result.add_data(job_summary)
         action_result.update_summary({"Job ID": job_id, "Score": job_summary.get("DisplayScore"), "AppURL": app_url})
@@ -487,8 +476,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_splunk_attack_analyzer_get_job_pdf(self, params):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
@@ -514,14 +502,13 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             action_result.add_data(vault_detail)
             action_result.append_to_message("Attached PDF report")
         except Exception as e:
-            self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
+            self.debug_print(f"Exception occured: {self._get_error_message_from_exception(e)}")
             return action_result.set_status(phantom.APP_ERROR, "Unable to get PDF report")
 
         return action_result.set_status(phantom.APP_SUCCESS, "Successfully attached PDF report")
 
     def _handle_splunk_attack_analyzer_get_job_screenshots(self, params):
-
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
@@ -554,13 +541,13 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             action_result.append_to_message(f"Attached {screenshot_count} screenshots")
             action_result.update_summary({"screenshot_count": screenshot_count})
         except Exception as e:
-            self.debug_print("Exception occured: {}".format(self._get_error_message_from_exception(e)))
+            self.debug_print(f"Exception occured: {self._get_error_message_from_exception(e)}")
             return action_result.set_status(phantom.APP_ERROR, "Unable to download screenshots")
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_splunk_attack_analyzer_get_job_system_tags(self, params):
-        self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
         action_result = self.add_action_result(ActionResult(dict(params)))
 
@@ -596,7 +583,6 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         return action_result.set_status(phantom.APP_SUCCESS, "Successfully retrieved system tags")
 
     def handle_action(self, param):
-
         ret_val = phantom.APP_SUCCESS
 
         # Get the action that we are supposed to execute for this App Run
@@ -650,7 +636,6 @@ def main():
     password = args.password
 
     if username is not None and password is None:
-
         # User specified a username but not a password, so ask
         import getpass
 

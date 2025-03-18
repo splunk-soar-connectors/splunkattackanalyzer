@@ -1,6 +1,6 @@
 <!-- File: job_summary.html
 
-  Copyright (c) 2023-2024 Splunk Inc.
+  Copyright (c) 2023-2025 Splunk Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -13,19 +13,18 @@
   either express or implied. See the License for the specific language governing permissions
   and limitations under the License.
 -->
-
 {% extends 'widgets/widget_template.html' %}
 {% load custom_template %}
-
-{% block custom_title_prop %}{% if title_logo %}style="background-size: auto 60%; background-position: 50%; background-repeat: no-repeat; background-image: url('/app_resource/{{ title_logo }}');"{% endif %}{% endblock %}
+{% block custom_title_prop %}
+  {% if title_logo %}
+    style="background-size: auto 60%; background-position: 50%; background-repeat: no-repeat; background-image: url('/app_resource/{{ title_logo }}');"
+  {% endif %}
+{% endblock %}
 {% block title1 %}{{ title1 }}{% endblock %}
 {% block title2 %}{{ title2 }}{% endblock %}
-{% block custom_tools %}
-{% endblock %}
-
+{% block custom_tools %}{% endblock %}
 {% block widget_content %}
-
-<style>
+  <style>
     .tag {
         padding: 0.25em;
         border-radius: 4px;
@@ -95,87 +94,81 @@
       padding-left: 16px;
     }
 
-</style>
-<div class="splunk_attack_analyzer" style="overflow: auto; width: 100%; height: 100%; padding-left: 10px; padding-right: 10px;">
+  </style>
+  <div class="splunk_attack_analyzer"
+       style="overflow: auto;
+              width: 100%;
+              height: 100%;
+              padding-left: 10px;
+              padding-right: 10px">
     {% if not results %}
-        <h4 class="wf-h4-style">No data found</h4>
+      <h4 class="wf-h4-style">No data found</h4>
     {% else %}
-    {% for result in results %}
-        {% with job=result.data%}
-            <h2>{{job.Submission.Name}}</h2>
-            <a target="_blank" href="{{result.summary.AppURL}}">view in splunk attack analyzer <i class="fa fa-external-link-square"></i></a>
-            <table class="jobmeta">
-                <tbody>
+      {% for result in results %}
+        {% with job=result.data %}
+          <h2>{{ job.Submission.Name }}</h2>
+          <a target="_blank" href="{{ result.summary.AppURL }}">view in splunk attack analyzer <i class="fa fa-external-link-square"></i></a>
+          <table class="jobmeta">
+            <tbody>
+              <tr>
+                <th>Score</th>
+                <td>
+                  <span class="tag">{{ job.DisplayScore }}</span>
+                </td>
+              </tr>
+              {% if job.Verdict %}
+                <tr>
+                  <th>Verdict</th>
+                  <td>
+                    <span class="tag">{{ job.Verdict }}</span>
+                  </td>
+                </tr>
+              {% endif %}
+              {% if result.phished_brands %}
+                <tr>
+                  <th>Phished Brands</th>
+                  <td>
+                    {% for brand in result.phished_brands %}<span class="tag">{{ brand }}</span>{% endfor %}
+                  </td>
+                {% endif %}
+                {% if result.phishkit_families %}
+                  <tr>
+                    <th>Phish Kit Families</th>
+                    <td>
+                      {% for family in result.phishkit_families %}<span class="tag">{{ family }}</span>{% endfor %}
+                    </td>
+                  {% endif %}
+                  {% if result.malware_families %}
                     <tr>
-                        <th>Score</th>
-                        <td>
-                            <span class="tag">{{job.DisplayScore}}</span>
-                        </td>
-                    </tr>
-                    {% if job.Verdict %}
-                    <tr>
-                        <th>Verdict</th>
-                        <td><span class="tag">{{job.Verdict}}</span></td>
-                    </tr>
+                      <th>Malware Families</th>
+                      <td>
+                        {% for family in result.malware_families %}<span class="tag">{{ family }}</span>{% endfor %}
+                      </td>
                     {% endif %}
-                    {% if result.phished_brands %}
-                    <tr>
-                        <th>Phished Brands</th>
-                        <td>
-                            {% for brand in result.phished_brands %}
-                                <span class="tag">{{brand}}</span>
-                            {% endfor %}
-                        </td>
-                    {% endif %}
-                    {% if result.phishkit_families %}
-                    <tr>
-                        <th>Phish Kit Families</th>
-                        <td>
-                            {% for family in result.phishkit_families %}
-                                <span class="tag">{{family}}</span>
-                            {% endfor %}
-                        </td>
-                    {% endif %}
-                    {% if result.malware_families %}
-                    <tr>
-                        <th>Malware Families</th>
-                        <td>
-                            {% for family in result.malware_families %}
-                                <span class="tag">{{family}}</span>
-                            {% endfor %}
-                        </td>
-                    {% endif %}
-
                     {% if job.State != "done" %}
-                    <tr>
+                      <tr>
                         <th>Job State</th>
-                        <td>{{job.State}}</td>
-                    </tr>
+                        <td>{{ job.State }}</td>
+                      </tr>
                     {% endif %}
-                </tbody>
-            </table>
-
-            <h3>Resources Analyzed</h3>
-
-            <div class="treelist">
-                <ul class="root">
-                {% for r in result.ordered_resources %}
-                    <li>
-                        <div class="resource" style="margin-left: {{r.depth}}em;">
-                            <i class="fa fa-caret-right"></i>&nbsp;
-                            {% if r.node.DisplayScore >= 70 %}
-                                <i class="fa fa-exclamation-circle"></i>&nbsp;
-                            {% endif %}
-                            <span class="resource-title">{{r.node.Name}}</span>
+                  </tbody>
+                </table>
+                <h3>Resources Analyzed</h3>
+                <div class="treelist">
+                  <ul class="root">
+                    {% for r in result.ordered_resources %}
+                      <li>
+                        <div class="resource" style="margin-left: {{ r.depth }}em;">
+                          <i class="fa fa-caret-right"></i>&nbsp;
+                          {% if r.node.DisplayScore >= 70 %}<i class="fa fa-exclamation-circle"></i>&nbsp;{% endif %}
+                          <span class="resource-title">{{ r.node.Name }}</span>
                         </div>
-                    </li>
-                {% endfor %}
-                </ul>
-            </div>
-        {% endwith %}
-    {% endfor %}
-    {% endif %}
-
-</div>
-
-{% endblock %}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endwith %}
+            {% endfor %}
+          {% endif %}
+        </div>
+      {% endblock %}
