@@ -1,6 +1,6 @@
 # File: splunkattackanalyzer_view.py
 #
-# Copyright (c) 2023-2024 Splunk Inc.
+# Copyright (c) 2023-2025 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ def job_summary(provides, all_app_runs, context):
     context["results"] = results = []
     for summary, action_results in all_app_runs:
         for result in action_results:
-
             ctx_result = get_ctx_result(result)
             if not ctx_result or not ctx_result.get("data"):
                 continue
@@ -42,7 +41,7 @@ def job_summary(provides, all_app_runs, context):
             for r in resources:
                 r["_children"] = [r2 for r2 in resources if r2["ParentID"] == r["ID"]]
 
-            ctx_result["ordered_resources"] = _tree_order_resources([r for r in resources if not r["ParentID"]][0])
+            ctx_result["ordered_resources"] = _tree_order_resources(next(r for r in resources if not r["ParentID"]))
 
             ctx_result["phished_brands"] = [label["Value"] for label in job["Labels"] if label["Type"] == "phished_brand"]
             ctx_result["malware_families"] = [label["Value"] for label in job["Labels"] if label["Type"] == "malware_family"]

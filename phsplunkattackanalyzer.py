@@ -1,6 +1,6 @@
 # File: phsplunkattackanalyzer.py
 #
-# Copyright (c) 2023-2024 Splunk Inc.
+# Copyright (c) 2023-2025 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import time
 from datetime import datetime, timedelta
 
 import requests
+
 
 """ CONSTANTS """
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -122,7 +123,6 @@ class SplunkAttackAnalyzer:
         return resp.json()
 
     def submit_url(self, scan_url, engine_list=[], parameters=None, priority=None, profile=None):
-
         parameters_to_submit = self.format_parameters_for_submission(parameters)
 
         url = f"{self._host}/jobs/urls"
@@ -137,7 +137,6 @@ class SplunkAttackAnalyzer:
         return resp.json()
 
     def submit_file(self, file_name, file_obj, engine_list=[], priority=None, profile=None, parameters=None):
-
         url = f"{self._host}/jobs/files"
         payload = {}
         file_dict = {"filedata": file_obj}
@@ -166,7 +165,6 @@ class SplunkAttackAnalyzer:
         return resp.content
 
     def format_parameters_for_submission(self, param_dict):
-
         if not param_dict:
             return []
 
