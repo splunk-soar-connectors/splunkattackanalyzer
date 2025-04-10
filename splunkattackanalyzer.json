@@ -545,7 +545,7 @@
                     "data_path": "action_result.data.*.Detections.*.Details.Extracted Values.*.Value",
                     "data_type": "string",
                     "example_values": [
-                        "\u00a9 2021 Test"
+                        "© 2021 Test"
                     ]
                 },
                 {
@@ -6684,8 +6684,5 @@
             "output": [],
             "versions": "EQ(*)"
         }
-    ],
-    "pip39_dependencies": {
-        "wheel": []
-    }
+    ]
 }
