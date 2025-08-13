@@ -73,6 +73,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 
 [get job screenshots](#action-get-job-screenshots) - Get screenshots for the specified job and store them in the vault \
 [get pdf report](#action-get-pdf-report) - Get the PDF report for a completed job \
+[get ai malware analysis](#action-get-ai-malware-analysis) - Get the ai malware analysis for a completed job \
 [get job forensics](#action-get-job-forensics) - Get the consolidated forensics for a completed job \
 [get job summary](#action-get-job-summary) - Get a job summary for a submitted job \
 [list recent jobs](#action-list-recent-jobs) - Get a list of recent jobs \
@@ -159,6 +160,83 @@ action_result.summary | string | | |
 action_result.message | string | | Successfully attached PDF report |
 summary.total_objects | numeric | | 2 |
 summary.total_objects_successful | numeric | | 2 |
+
+## action: 'get ai malware analysis'
+
+Get the ai malware analysis for a completed job
+
+Type: **investigate** \
+Read only: **True**
+
+Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.
+
+#### Action Parameters
+
+PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
+--------- | -------- | ----------- | ---- | --------
+**job_id** | required | Job id of the ai malware analysis you want pulled | string | `splunk attack analyzer job id` |
+**timeout** | optional | Maximum time (in minutes) to wait for job to be completed | numeric | |
+
+#### Action Output
+
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string | | success failed |
+action_result.parameter.job_id | string | `splunk attack analyzer job id` | 63572265-c5ae-402f-9fc1-6c90547482ee |
+action_result.parameter.timeout | numeric | | 30 |
+action_result.data.\*.IOCs.urls.\* | string | | http://splunk.com |
+action_result.data.\*.IOCs.hostnames.\* | string | | splunk.com |
+action_result.data.\*.IOCs.file_paths.\* | string | | |
+action_result.data.\*.IOCs.ip_addresses.\* | string | | |
+action_result.data.\*.IOCs.registry_keys.\* | string | | |
+action_result.data.\*.IOCs.relevant_code.\*.code | string | | |
+action_result.data.\*.IOCs.relevant_code.\*.regex | string | | |
+action_result.data.\*.IOCs.relevant_code.\*.purpose | string | | |
+action_result.data.\*.IOCs.relevant_code.\*.description | string | | |
+action_result.data.\*.IOCs.hallucinations.urls.\* | string | | |
+action_result.data.\*.IOCs.hallucinations.domains.\* | string | | |
+action_result.data.\*.cached | boolean | | |
+action_result.data.\*.verdict | string | | Likely Malicious |
+action_result.data.\*.token_usage.cumulative.attempts | numeric | | |
+action_result.data.\*.token_usage.cumulative.input_tokens | numeric | | |
+action_result.data.\*.token_usage.cumulative.total_tokens | numeric | | |
+action_result.data.\*.token_usage.cumulative.cached_tokens | numeric | | |
+action_result.data.\*.token_usage.cumulative.output_tokens | numeric | | |
+action_result.data.\*.token_usage.decode_attempt.input_tokens | numeric | | |
+action_result.data.\*.token_usage.decode_attempt.total_tokens | numeric | | |
+action_result.data.\*.token_usage.decode_attempt.cached_tokens | numeric | | |
+action_result.data.\*.token_usage.decode_attempt.output_tokens | numeric | | |
+action_result.data.\*.token_usage.current_attempt.input_tokens | numeric | | |
+action_result.data.\*.token_usage.current_attempt.total_tokens | numeric | | |
+action_result.data.\*.token_usage.current_attempt.cached_tokens | numeric | | |
+action_result.data.\*.token_usage.current_attempt.output_tokens | numeric | | |
+action_result.data.\*.token_usage.is_obfuscated | boolean | | |
+action_result.data.\*.recommendations.\* | string | | |
+action_result.data.\*.truncation_info.was_truncated | boolean | | |
+action_result.data.\*.truncation_info.original_length | numeric | | |
+action_result.data.\*.truncation_info.truncated_length | numeric | | |
+action_result.data.\*.truncation_info.removed_characters | numeric | | |
+action_result.data.\*.executive_summary.\* | string | | |
+action_result.data.\*.analysis_timestamp | string | | |
+action_result.data.\*.technical_analysis.\* | string | | |
+action_result.data.\*.maliciousness_score | numeric | | |
+action_result.data.\*.domain_investigations.debug.domain_with_data | numeric | | |
+action_result.data.\*.domain_investigations.debug.valid_domains_count | numeric | | |
+action_result.data.\*.domain_investigations.debug.domains_without_data | numeric | | |
+action_result.data.\*.domain_investigations.debug.invalid_domains_count | numeric | | |
+action_result.data.\*.domain_investigations.debug.total_domains_received | numeric | | |
+action_result.data.\*.domain_investigations.debug.processing_completed_at | string | | |
+action_result.data.\*.domain_investigations.debug.unique_domains_processed | numeric | | |
+action_result.data.\*.domain_investigations.debug.potential_hallucinations_count | numeric | | |
+action_result.data.\*.domain_investigations.domain_ages.\*.domains | string | | |
+action_result.data.\*.domain_investigations.domain_ages.\*.age_days | numeric | | |
+action_result.data.\*.domain_investigations.domain_ages.\*.created_at | string | | |
+action_result.data.\*.domain_investigations.valid_domains.\* | string | | |
+action_result.message | string | | AI analysis retrieved successfully |
+action_result.summary.job_id | string | | |
+action_result.summary.total_files_analyzed | numeric | | |
+summary.total_objects | numeric | | |
+summary.total_objects_successful | numeric | | |
 
 ## action: 'get job forensics'
 
