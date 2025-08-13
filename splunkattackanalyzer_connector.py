@@ -196,6 +196,52 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         action_result.add_data(job_fore)
         return action_result.set_status(phantom.APP_SUCCESS, "Job normal forensics retrieved")
 
+    def _handle_get_ai_analysis(self, params):
+        self.save_progress(f"In action handler for: {self.get_action_identifier()}")
+
+        action_result = self.add_action_result(ActionResult(dict(params)))
+
+        ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout")
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+
+        job_id = params["job_id"]
+
+        job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes)
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
+
+        if job_summary["State"] == "inprogress":
+            return action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_VALIDATE_JOB_STATE.format("find job forensics"))
+
+        try:
+            job_fore = self._splunkattackanalyzer.get_job_normalized_forensics(job_id)
+            strings = job_fore.get("Strings", [])
+        except Exception as e:
+            self.debug_print(f"Exception occured: {self._get_error_message_from_exception(e)}")
+            return action_result.set_status(phantom.APP_ERROR, "Unable to retrieve forensics")
+
+        for string in strings:
+            source = string.get("Details", {}).get("Source", "")
+            if source == "ai_script_analysis":
+                try:
+                    ai_analysis = json.loads(string["String"])
+                    action_result.add_data(ai_analysis["analysis"])
+                except json.JSONDecodeError as e:
+                    self.debug_print(f"JSONDecodeError occured: {self._get_error_message_from_exception(e)}")
+                    return action_result.set_status(phantom.APP_ERROR, "Unable to convert AI analysis string into JSON")
+                except Exception as e:
+                    self.debug_print(f"Exception occured: {self._get_error_message_from_exception(e)}")
+                    return action_result.set_status(phantom.APP_ERROR, "Unable to retrieve AI analysis")
+
+        summary = {
+            "job_id": job_id,
+            "total_files_analyzed": len(action_result.get_data()),
+        }
+        action_result.update_summary(summary)
+
+        return action_result.set_status(phantom.APP_SUCCESS, "AI analysis retrieved successfully")
+
     def _handle_splunk_attack_analyzer_submit_file(self, params):
         self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
@@ -594,6 +640,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             ret_val = self._handle_test_connectivity(param)
         elif action_id == "splunk_attack_analyzer_get_job_normalized_forensics":
             ret_val = self._handle_splunk_attack_analyzer_get_job_normalized_forensics(param)
+        elif action_id == "splunk_attack_analyzer_get_ai_malware_analysis":
+            ret_val = self._handle_get_ai_analysis(param)
         elif action_id == "splunk_attack_analyzer_get_job_summary":
             ret_val = self._handle_splunk_attack_analyzer_get_job_summary(param)
         elif action_id == "splunk_attack_analyzer_list_recent_jobs":

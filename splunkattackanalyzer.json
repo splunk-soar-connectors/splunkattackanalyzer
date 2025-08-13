@@ -370,6 +370,286 @@
             "versions": "EQ(*)"
         },
         {
+            "action": "get ai malware analysis",
+            "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.",
+            "identifier": "splunk_attack_analyzer_get_ai_malware_analysis",
+            "description": "Get the ai malware analysis for a completed job",
+            "type": "investigate",
+            "read_only": true,
+            "parameters": {
+                "job_id": {
+                    "description": "Job id of the ai malware analysis you want pulled",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": true,
+                    "contains": [
+                        "splunk attack analyzer job id"
+                    ],
+                    "order": 0
+                },
+                "timeout": {
+                    "description": "Maximum time (in minutes) to wait for job to be completed",
+                    "data_type": "numeric",
+                    "order": 1
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success",
+                        "failed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.job_id",
+                    "data_type": "string",
+                    "contains": [
+                        "splunk attack analyzer job id"
+                    ],
+                    "example_values": [
+                        "63572265-c5ae-402f-9fc1-6c90547482ee"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.timeout",
+                    "data_type": "numeric",
+                    "example_values": [
+                        30
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.IOCs.urls.*",
+                    "data_type": "string",
+                    "example_values": [
+                        "http://splunk.com"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.IOCs.hostnames.*",
+                    "data_type": "string",
+                    "example_values": [
+                        "splunk.com"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.IOCs.file_paths.*",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.IOCs.ip_addresses.*",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.IOCs.registry_keys.*",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.IOCs.relevant_code.*.code",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.IOCs.relevant_code.*.regex",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.IOCs.relevant_code.*.purpose",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.IOCs.relevant_code.*.description",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.IOCs.hallucinations.urls.*",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.IOCs.hallucinations.domains.*",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.cached",
+                    "data_type": "boolean"
+                },
+                {
+                    "data_path": "action_result.data.*.verdict",
+                    "data_type": "string",
+                    "example_values": [
+                        "Likely Malicious"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.cumulative.attempts",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.cumulative.input_tokens",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.cumulative.total_tokens",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.cumulative.cached_tokens",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.cumulative.output_tokens",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.decode_attempt.input_tokens",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.decode_attempt.total_tokens",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.decode_attempt.cached_tokens",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.decode_attempt.output_tokens",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.current_attempt.input_tokens",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.current_attempt.total_tokens",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.current_attempt.cached_tokens",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.current_attempt.output_tokens",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.token_usage.is_obfuscated",
+                    "data_type": "boolean"
+                },
+                {
+                    "data_path": "action_result.data.*.recommendations.*",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.truncation_info.was_truncated",
+                    "data_type": "boolean"
+                },
+                {
+                    "data_path": "action_result.data.*.truncation_info.original_length",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.truncation_info.truncated_length",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.truncation_info.removed_characters",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.executive_summary.*",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.analysis_timestamp",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.technical_analysis.*",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.maliciousness_score",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.domain_investigations.debug.domain_with_data",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.domain_investigations.debug.valid_domains_count",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.domain_investigations.debug.domains_without_data",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.domain_investigations.debug.invalid_domains_count",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.domain_investigations.debug.total_domains_received",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.domain_investigations.debug.processing_completed_at",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.domain_investigations.debug.unique_domains_processed",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.domain_investigations.debug.potential_hallucinations_count",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.domain_investigations.domain_ages.*.domains",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.domain_investigations.domain_ages.*.age_days",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.data.*.domain_investigations.domain_ages.*.created_at",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.domain_investigations.valid_domains.*",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "AI analysis retrieved successfully"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.job_id",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.summary.total_files_analyzed",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
+                }
+            ],
+            "render": {
+                "type": "json"
+            },
+            "versions": "EQ(*)"
+        },
+        {
             "action": "get job forensics",
             "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.",
             "identifier": "splunk_attack_analyzer_get_job_normalized_forensics",
