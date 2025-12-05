@@ -1,1 +1,2 @@
 **Unreleased**
+* add widget support for get ai malware analysis action

@@ -291,7 +291,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                         return action_result.get_status()
                     saa_parameters["user_agent"] = f"alias:{user_agent}"
 
-            success, message, info = vault.vault_info(vault_id=file_id)
+            _success, _message, info = vault.vault_info(vault_id=file_id)
             file_path = info[0]["path"]
             file_name = info[0]["name"]
             f = open(file_path, "rb")

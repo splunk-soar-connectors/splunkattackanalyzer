@@ -1,10 +1,10 @@
 # Splunk Attack Analyzer Connector for Splunk SOAR
 
-Publisher: Splunk \
-Connector Version: 2.1.0 \
-Product Vendor: Splunk \
-Product Name: Splunk Attack Analyzer \
-Minimum Product Version: 6.2.2
+Publisher: Splunk <br>
+Connector Version: 2.1.0 <br>
+Product Vendor: Splunk <br>
+Product Name: Splunk Attack Analyzer <br>
+Minimum Product Version: 6.3.0
 
 This connector integrates with the Splunk Attack Analyzer platform to reduce the friction of repetitive manual tasks typically associated with investigating threats
 
@@ -71,23 +71,23 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 
 ### Supported Actions
 
-[get job screenshots](#action-get-job-screenshots) - Get screenshots for the specified job and store them in the vault \
-[get pdf report](#action-get-pdf-report) - Get the PDF report for a completed job \
-[get ai malware analysis](#action-get-ai-malware-analysis) - Get the ai malware analysis for a completed job \
-[get job forensics](#action-get-job-forensics) - Get the consolidated forensics for a completed job \
-[get job summary](#action-get-job-summary) - Get a job summary for a submitted job \
-[list recent jobs](#action-list-recent-jobs) - Get a list of recent jobs \
-[detonate file](#action-detonate-file) - Submit File for Scanning \
-[detonate url](#action-detonate-url) - Submit New URL for Scanning \
-[get system tags](#action-get-system-tags) - Retrieve system tags for a specific job \
-[on poll](#action-on-poll) - Callback action for the on_poll ingest functionality \
+[get job screenshots](#action-get-job-screenshots) - Get screenshots for the specified job and store them in the vault <br>
+[get pdf report](#action-get-pdf-report) - Get the PDF report for a completed job <br>
+[get ai malware analysis](#action-get-ai-malware-analysis) - Get the ai malware analysis for a completed job <br>
+[get job forensics](#action-get-job-forensics) - Get the consolidated forensics for a completed job <br>
+[get job summary](#action-get-job-summary) - Get a job summary for a submitted job <br>
+[list recent jobs](#action-list-recent-jobs) - Get a list of recent jobs <br>
+[detonate file](#action-detonate-file) - Submit File for Scanning <br>
+[detonate url](#action-detonate-url) - Submit New URL for Scanning <br>
+[get system tags](#action-get-system-tags) - Retrieve system tags for a specific job <br>
+[on poll](#action-on-poll) - Callback action for the on_poll ingest functionality <br>
 [test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity using supplied configuration
 
 ## action: 'get job screenshots'
 
 Get screenshots for the specified job and store them in the vault
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.
@@ -127,7 +127,7 @@ summary.total_objects_successful | numeric | | 2 |
 
 Get the PDF report for a completed job
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.
@@ -165,7 +165,7 @@ summary.total_objects_successful | numeric | | 2 |
 
 Get the ai malware analysis for a completed job
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.
@@ -242,7 +242,7 @@ summary.total_objects_successful | numeric | | |
 
 Get the consolidated forensics for a completed job
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.
@@ -854,7 +854,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Get a job summary for a submitted job
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.
@@ -1184,7 +1184,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Get a list of recent jobs
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -1269,7 +1269,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Submit File for Scanning
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **False**
 
 #### Action Parameters
@@ -1308,7 +1308,7 @@ action_result.parameter.ph_0 | ph | | |
 
 Submit New URL for Scanning
 
-Type: **generic** \
+Type: **generic** <br>
 Read only: **False**
 
 #### Action Parameters
@@ -1347,7 +1347,7 @@ action_result.parameter.ph_0 | ph | | |
 
 Retrieve system tags for a specific job
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -1377,7 +1377,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Callback action for the on_poll ingest functionality
 
-Type: **ingest** \
+Type: **ingest** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -1398,7 +1398,7 @@ No Output
 
 Validate the asset configuration for connectivity using supplied configuration
 
-Type: **test** \
+Type: **test** <br>
 Read only: **True**
 
 #### Action Parameters

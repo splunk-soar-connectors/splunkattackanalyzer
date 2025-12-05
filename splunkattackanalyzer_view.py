@@ -67,3 +67,70 @@ def get_ctx_result(result):
         ctx_result["summary"] = summary
 
     return ctx_result
+
+
+def ai_malware_analysis(provides, all_app_runs, context):
+    context["results"] = results = []
+    for summary, action_results in all_app_runs:
+        for result in action_results:
+            ctx_result = get_ctx_result(result)
+            if not ctx_result or not ctx_result.get("data"):
+                continue
+
+            data = ctx_result["data"]
+
+            # Extract executive summary (handle both list and other formats)
+            ctx_result["executive_summary"] = data.get("executive_summary", [])
+            if not isinstance(ctx_result["executive_summary"], list):
+                ctx_result["executive_summary"] = [ctx_result["executive_summary"]] if ctx_result["executive_summary"] else []
+
+            # Extract technical analysis
+            ctx_result["technical_analysis"] = data.get("technical_analysis", [])
+            if not isinstance(ctx_result["technical_analysis"], list):
+                ctx_result["technical_analysis"] = [ctx_result["technical_analysis"]] if ctx_result["technical_analysis"] else []
+
+            # Extract recommendations
+            ctx_result["recommendations"] = data.get("recommendations", [])
+            if not isinstance(ctx_result["recommendations"], list):
+                ctx_result["recommendations"] = [ctx_result["recommendations"]] if ctx_result["recommendations"] else []
+
+            # Extract IOCs
+            iocs = data.get("IOCs", {})
+            ctx_result["iocs"] = {
+                "urls": iocs.get("urls", []),
+                "hostnames": iocs.get("hostnames", []),
+                "ip_addresses": iocs.get("ip_addresses", []),
+                "file_paths": iocs.get("file_paths", []),
+                "registry_keys": iocs.get("registry_keys", []),
+                "relevant_code": iocs.get("relevant_code", []),
+            }
+
+            # Check if there are any IOCs
+            ctx_result["has_iocs"] = any(
+                [
+                    ctx_result["iocs"]["urls"],
+                    ctx_result["iocs"]["hostnames"],
+                    ctx_result["iocs"]["ip_addresses"],
+                    ctx_result["iocs"]["file_paths"],
+                    ctx_result["iocs"]["registry_keys"],
+                    ctx_result["iocs"]["relevant_code"],
+                ]
+            )
+
+            # Extract hallucinations if present
+            hallucinations = iocs.get("hallucinations", {})
+            if hallucinations and (hallucinations.get("urls") or hallucinations.get("domains")):
+                ctx_result["hallucinations"] = {
+                    "urls": hallucinations.get("urls", []),
+                    "domains": hallucinations.get("domains", []),
+                }
+            else:
+                ctx_result["hallucinations"] = None
+
+            # Extract domain investigation data
+            domain_investigations = data.get("domain_investigations", {})
+            ctx_result["domain_ages"] = domain_investigations.get("domain_ages", [])
+
+            results.append(ctx_result)
+
+    return "ai_malware_analysis.html"

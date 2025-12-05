@@ -19,7 +19,7 @@
     "utctime_updated": "2025-08-26T20:46:55.896167Z",
     "package_name": "phantom_splunkattackanalyzer",
     "main_module": "splunkattackanalyzer_connector.py",
-    "min_phantom_version": "6.2.2",
+    "min_phantom_version": "6.3.0",
     "app_wizard_version": "1.0.0",
     "configuration": {
         "app_url": {
@@ -645,7 +645,11 @@
                 }
             ],
             "render": {
-                "type": "json"
+                "type": "custom",
+                "width": 8,
+                "height": 8,
+                "view": "splunkattackanalyzer_view.ai_malware_analysis",
+                "title": "Splunk Attack Analyzer AI Malware Analysis"
             },
             "versions": "EQ(*)"
         },
@@ -6964,5 +6968,8 @@
             "output": [],
             "versions": "EQ(*)"
         }
-    ]
+    ],
+    "pip313_dependencies": {
+
+    }
 }
