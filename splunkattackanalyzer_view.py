@@ -113,7 +113,7 @@ def ai_malware_analysis(provides, all_app_runs, context):
                 "relevant_code": iocs.get("relevant_code", []),
             }
 
-            # Check if there are any IOCs (without redundant list literal)
+            # Check if there are any IOCs
             ctx_result["has_iocs"] = any(
                 (
                     ctx_result["iocs"]["urls"],
@@ -142,7 +142,7 @@ def ai_malware_analysis(provides, all_app_runs, context):
             else:
                 ctx_result["hallucinations"] = None
 
-            # Extract domain investigation data with type validation
+            # Extract domain investigation data
             domain_investigations = data.get("domain_investigations", {})
             if isinstance(domain_investigations, dict):
                 ctx_result["domain_ages"] = domain_investigations.get("domain_ages", [])
