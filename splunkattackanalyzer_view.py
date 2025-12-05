@@ -70,7 +70,16 @@ def get_ctx_result(result):
 
 
 def ai_malware_analysis(provides, all_app_runs, context):
+    """Process AI malware analysis results for display."""
+
+    def _ensure_list(value):
+        """Convert a value to a list if it isn't already."""
+        if value is None:
+            return []
+        return value if isinstance(value, list) else [value]
+
     context["results"] = results = []
+
     for summary, action_results in all_app_runs:
         for result in action_results:
             ctx_result = get_ctx_result(result)
@@ -79,23 +88,22 @@ def ai_malware_analysis(provides, all_app_runs, context):
 
             data = ctx_result["data"]
 
-            # Extract executive summary (handle both list and other formats)
-            ctx_result["executive_summary"] = data.get("executive_summary", [])
-            if not isinstance(ctx_result["executive_summary"], list):
-                ctx_result["executive_summary"] = [ctx_result["executive_summary"]] if ctx_result["executive_summary"] else []
+            # Extract top-level analysis metadata
+            ctx_result["verdict"] = data.get("verdict")
+            ctx_result["maliciousness_score"] = data.get("maliciousness_score")
+            ctx_result["analysis_timestamp"] = data.get("analysis_timestamp")
+            ctx_result["cached"] = data.get("cached")
 
-            # Extract technical analysis
-            ctx_result["technical_analysis"] = data.get("technical_analysis", [])
-            if not isinstance(ctx_result["technical_analysis"], list):
-                ctx_result["technical_analysis"] = [ctx_result["technical_analysis"]] if ctx_result["technical_analysis"] else []
+            # Extract and normalize list fields
+            ctx_result["executive_summary"] = _ensure_list(data.get("executive_summary"))
+            ctx_result["technical_analysis"] = _ensure_list(data.get("technical_analysis"))
+            ctx_result["recommendations"] = _ensure_list(data.get("recommendations"))
 
-            # Extract recommendations
-            ctx_result["recommendations"] = data.get("recommendations", [])
-            if not isinstance(ctx_result["recommendations"], list):
-                ctx_result["recommendations"] = [ctx_result["recommendations"]] if ctx_result["recommendations"] else []
-
-            # Extract IOCs
+            # Extract IOCs with type validation
             iocs = data.get("IOCs", {})
+            if not isinstance(iocs, dict):
+                iocs = {}
+
             ctx_result["iocs"] = {
                 "urls": iocs.get("urls", []),
                 "hostnames": iocs.get("hostnames", []),
@@ -105,31 +113,50 @@ def ai_malware_analysis(provides, all_app_runs, context):
                 "relevant_code": iocs.get("relevant_code", []),
             }
 
-            # Check if there are any IOCs
+            # Check if there are any IOCs (without redundant list literal)
             ctx_result["has_iocs"] = any(
-                [
+                (
                     ctx_result["iocs"]["urls"],
                     ctx_result["iocs"]["hostnames"],
                     ctx_result["iocs"]["ip_addresses"],
                     ctx_result["iocs"]["file_paths"],
                     ctx_result["iocs"]["registry_keys"],
                     ctx_result["iocs"]["relevant_code"],
-                ]
+                )
             )
 
             # Extract hallucinations if present
             hallucinations = iocs.get("hallucinations", {})
-            if hallucinations and (hallucinations.get("urls") or hallucinations.get("domains")):
-                ctx_result["hallucinations"] = {
-                    "urls": hallucinations.get("urls", []),
-                    "domains": hallucinations.get("domains", []),
-                }
+            if isinstance(hallucinations, dict) and hallucinations:
+                urls = hallucinations.get("urls", [])
+                domains = hallucinations.get("domains", [])
+
+                # Only set hallucinations if there are actual items
+                if urls or domains:
+                    ctx_result["hallucinations"] = {
+                        "urls": urls,
+                        "domains": domains,
+                    }
+                else:
+                    ctx_result["hallucinations"] = None
             else:
                 ctx_result["hallucinations"] = None
 
-            # Extract domain investigation data
+            # Extract domain investigation data with type validation
             domain_investigations = data.get("domain_investigations", {})
-            ctx_result["domain_ages"] = domain_investigations.get("domain_ages", [])
+            if isinstance(domain_investigations, dict):
+                ctx_result["domain_ages"] = domain_investigations.get("domain_ages", [])
+                ctx_result["valid_domains"] = domain_investigations.get("valid_domains", [])
+            else:
+                ctx_result["domain_ages"] = []
+                ctx_result["valid_domains"] = []
+
+            # Extract truncation info
+            truncation_info = data.get("truncation_info", {})
+            if isinstance(truncation_info, dict):
+                ctx_result["was_truncated"] = truncation_info.get("was_truncated", False)
+            else:
+                ctx_result["was_truncated"] = False
 
             results.append(ctx_result)
 
