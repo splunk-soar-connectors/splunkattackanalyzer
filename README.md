@@ -4,7 +4,7 @@ Publisher: Splunk <br>
 Connector Version: 2.2.0 <br>
 Product Vendor: Splunk <br>
 Product Name: Splunk Attack Analyzer <br>
-Minimum Product Version: 6.4.0
+Minimum Product Version: 8.6.0
 
 This connector integrates with the Splunk Attack Analyzer platform to reduce the friction of repetitive manual tasks typically associated with investigating threats
 
