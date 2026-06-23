@@ -4,7 +4,7 @@ Publisher: Splunk <br>
 Connector Version: 2.2.0 <br>
 Product Vendor: Splunk <br>
 Product Name: Splunk Attack Analyzer <br>
-Minimum Product Version: 6.4.0
+Minimum Product Version: 8.6.0
 
 This connector integrates with the Splunk Attack Analyzer platform to reduce the friction of repetitive manual tasks typically associated with investigating threats
 
@@ -1280,7 +1280,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **user_agent** | optional | User agent for Web Analyzer runs (Select "Custom" to provide custom user agent) | string | |
 **internet_region** | optional | GeoIP-based exit region for Web Analyzer runs | string | |
 **custom_user_agent** | optional | Activated when user agent is "Custom" | string | |
-**archive_password** | optional | For password-protected archive files or for decrypting documents | string | |
+**archive_password** | optional | For password-protected archive files or for decrypting documents | password | |
 **profile** | optional | An optional profile name that defines the analysis behavior to be used during the analysis for this job | string | `splunk attack analyzer profile` |
 
 #### Action Output
@@ -1288,7 +1288,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
 action_result.status | string | | success failed |
-action_result.parameter.archive_password | string | | |
+action_result.parameter.archive_password | password | | |
 action_result.parameter.profile | string | `splunk attack analyzer profile` | default |
 action_result.parameter.custom_user_agent | string | | Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0 |
 action_result.parameter.file | string | `vault id` | 89b238c79f7752948b176222ae0010d0a1aa |
@@ -1319,7 +1319,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **user_agent** | optional | User agent for Web Analyzer runs (Select "Custom" to provide custom user agent) | string | |
 **internet_region** | optional | GeoIP-based exit region for Web Analyzer runs | string | |
 **custom_user_agent** | optional | Activated when user agent is "Custom" | string | |
-**archive_password** | optional | For password-protected archive files or for decrypting documents | string | |
+**archive_password** | optional | For password-protected archive files or for decrypting documents | password | |
 **profile** | optional | An optional profile name that defines the analysis behavior to be used during the analysis for this job | string | `splunk attack analyzer profile` |
 
 #### Action Output
@@ -1327,7 +1327,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
 action_result.status | string | | success failed |
-action_result.parameter.archive_password | string | | |
+action_result.parameter.archive_password | password | | |
 action_result.parameter.profile | string | `splunk attack analyzer profile` | default |
 action_result.parameter.custom_user_agent | string | | Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0 |
 action_result.parameter.internet_region | string | | US Residential US |
@@ -1413,7 +1413,7 @@ ______________________________________________________________________
 
 Auto-generated Splunk SOAR Connector documentation.
 
-Copyright 2025 Splunk Inc.
+Copyright 2026 Splunk Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

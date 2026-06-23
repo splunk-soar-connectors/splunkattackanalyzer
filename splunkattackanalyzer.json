@@ -10,7 +10,7 @@
     "python_version": "3.9, 3.13",
     "product_version_regex": ".*",
     "publisher": "Splunk",
-    "license": "Copyright (c) 2023-2025 Splunk Inc.",
+    "license": "Copyright (c) 2023-2026 Splunk Inc.",
     "latest_tested_versions": [
         "Cloud, API: api.twinwave.io, API version: v1"
     ],
@@ -19,7 +19,7 @@
     "utctime_updated": "2025-12-09T13:15:40.063995Z",
     "package_name": "phantom_splunkattackanalyzer",
     "main_module": "splunkattackanalyzer_connector.py",
-    "min_phantom_version": "6.4.0",
+    "min_phantom_version": "8.6.0",
     "app_wizard_version": "1.0.0",
     "configuration": {
         "app_url": {
@@ -6452,7 +6452,7 @@
                 },
                 "archive_password": {
                     "description": "For password-protected archive files or for decrypting documents",
-                    "data_type": "string",
+                    "data_type": "password",
                     "order": 5
                 },
                 "profile": {
@@ -6476,7 +6476,7 @@
                 },
                 {
                     "data_path": "action_result.parameter.archive_password",
-                    "data_type": "string"
+                    "data_type": "password"
                 },
                 {
                     "data_path": "action_result.parameter.profile",
@@ -6700,7 +6700,7 @@
                 },
                 "archive_password": {
                     "description": "For password-protected archive files or for decrypting documents",
-                    "data_type": "string",
+                    "data_type": "password",
                     "order": 5
                 },
                 "profile": {
@@ -6724,7 +6724,7 @@
                 },
                 {
                     "data_path": "action_result.parameter.archive_password",
-                    "data_type": "string"
+                    "data_type": "password"
                 },
                 {
                     "data_path": "action_result.parameter.profile",
