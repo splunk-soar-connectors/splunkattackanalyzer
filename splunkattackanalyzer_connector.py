@@ -408,7 +408,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                 self.debug_print("State file is corrupted, resetting the file")
                 self.save_progress("State file is corrupted, resetting the file")
                 self._state = {"app_version": self.get_app_json().get("app_version")}
-                self._handle_on_poll(params)
+                return self._handle_on_poll(params)
 
         ret_val, limit = _validate_integer(action_result, params.get("container_count", 0), "container_count")
         if phantom.is_fail(ret_val):
@@ -420,63 +420,73 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             self.debug_print(f"Exception occured: {self._get_error_message_from_exception(e)}")
             return action_result.set_status(phantom.APP_ERROR, "Unable to get jobs")
         if payload:
-            for job in payload:
-                self.add_to_container(job)
+            checkpoint = None
+            for job in sorted(payload, key=lambda item: item.get("UpdatedAt") or ""):
+                if not self.add_to_container(job):
+                    break
+                checkpoint = job.get("UpdatedAt")
             if not manual_polling:
-                self._state["UpdatedAt_Checkpoint"] = payload[0].get("UpdatedAt")
+                if checkpoint:
+                    self._state["UpdatedAt_Checkpoint"] = checkpoint
                 self.save_state(self._state)
         else:
             self.debug_print("payload_empty")
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def add_to_container(self, job):
-        container = {}
-        job_id = job["ID"]
-        submission_name = job["Submission"]["Name"]
-        container["name"] = submission_name
-        container["source_data_identifier"] = job_id
-        container["run_automation"] = True
-        container["data"] = job
-        container["artifacts"] = []
+        try:
+            container = {}
+            job_id = job["ID"]
+            submission_name = job["Submission"]["Name"]
+            container["name"] = submission_name
+            container["source_data_identifier"] = job_id
+            container["run_automation"] = True
+            container["data"] = job
+            container["artifacts"] = []
 
-        for resource in job["Resources"]:
-            severity = "low"
-            if resource["DisplayScore"] >= 70:
-                severity = "high"
-            elif resource["DisplayScore"] >= 30:
-                severity = "medium"
+            for resource in job["Resources"]:
+                severity = "low"
+                if resource["DisplayScore"] >= 70:
+                    severity = "high"
+                elif resource["DisplayScore"] >= 30:
+                    severity = "medium"
 
-            if resource["Type"] == "URL":
-                container["artifacts"].append(
-                    {
-                        "cef": {"requestURL": resource["Name"], "data": resource},
-                        "label": "url",
-                        "name": resource["Name"],
-                        "severity": severity,
-                        "type": "url",
-                    }
-                )
-            elif resource["Type"] == "file":
-                container["artifacts"].append(
-                    {
-                        "cef": {
-                            "fileName": resource["Name"],
-                            "fileHash": resource["FileMetadata"]["SHA256"],
-                            "fileSize": resource["FileMetadata"]["Size"],
-                            "fileType": resource["FileMetadata"]["MimeType"],
-                            "data": resource,
-                        },
-                        "label": "file",
-                        "name": resource["Name"],
-                        "severity": severity,
-                        "type": "file",
-                    }
-                )
+                if resource["Type"] == "URL":
+                    container["artifacts"].append(
+                        {
+                            "cef": {"requestURL": resource["Name"], "data": resource},
+                            "label": "url",
+                            "name": resource["Name"],
+                            "severity": severity,
+                            "type": "url",
+                        }
+                    )
+                elif resource["Type"] == "file":
+                    container["artifacts"].append(
+                        {
+                            "cef": {
+                                "fileName": resource["Name"],
+                                "fileHash": resource["FileMetadata"]["SHA256"],
+                                "fileSize": resource["FileMetadata"]["Size"],
+                                "fileType": resource["FileMetadata"]["MimeType"],
+                                "data": resource,
+                            },
+                            "label": "file",
+                            "name": resource["Name"],
+                            "severity": severity,
+                            "type": "file",
+                        }
+                    )
+        except Exception as e:
+            self.save_progress(f"Error preparing container: {self._get_error_message_from_exception(e)}")
+            return False
 
         ret_val, msg, cid = self.save_container(container)
         if phantom.is_fail(ret_val):
             self.save_progress(f"Error saving container: {msg}")
             self.debug_print(f"Error saving container: {msg} -- CID: {cid}")
+            return False
+        return True
 
     def _get_job_data(self, action_result, job_id, timeout_in_minutes):
         start_time = time.time()
