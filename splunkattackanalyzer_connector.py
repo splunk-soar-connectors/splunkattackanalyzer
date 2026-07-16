@@ -171,7 +171,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
     def _handle_splunk_attack_analyzer_get_job_normalized_forensics(self, params):
         self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
-        action_result = self.add_action_result(ActionResult(dict(params)))
+        sanitized_params = {key: value for key, value in params.items() if key != "archive_password"}
+        action_result = self.add_action_result(ActionResult(sanitized_params))
 
         ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout")
         if phantom.is_fail(ret_val):
@@ -199,7 +200,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
     def _handle_get_ai_analysis(self, params):
         self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
-        action_result = self.add_action_result(ActionResult(dict(params)))
+        sanitized_params = {key: value for key, value in params.items() if key != "archive_password"}
+        action_result = self.add_action_result(ActionResult(sanitized_params))
 
         ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout")
         if phantom.is_fail(ret_val):

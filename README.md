@@ -1288,7 +1288,6 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
 action_result.status | string | | success failed |
-action_result.parameter.archive_password | password | | |
 action_result.parameter.profile | string | `splunk attack analyzer profile` | default |
 action_result.parameter.custom_user_agent | string | | Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0 |
 action_result.parameter.file | string | `vault id` | 89b238c79f7752948b176222ae0010d0a1aa |
@@ -1303,6 +1302,7 @@ action_result.message | string | | Submitted file |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 action_result.parameter.ph_0 | ph | | |
+action_result.parameter.archive_password | password | | |
 
 ## action: 'detonate url'
 
@@ -1327,7 +1327,6 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
 action_result.status | string | | success failed |
-action_result.parameter.archive_password | password | | |
 action_result.parameter.profile | string | `splunk attack analyzer profile` | default |
 action_result.parameter.custom_user_agent | string | | Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0 |
 action_result.parameter.internet_region | string | | US Residential US |
@@ -1342,6 +1341,7 @@ action_result.message | string | | Submitted URL |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 action_result.parameter.ph_0 | ph | | |
+action_result.parameter.archive_password | password | | |
 
 ## action: 'get system tags'
 

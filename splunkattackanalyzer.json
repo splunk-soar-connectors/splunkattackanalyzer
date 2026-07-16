@@ -6475,10 +6475,6 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.archive_password",
-                    "data_type": "password"
-                },
-                {
                     "data_path": "action_result.parameter.profile",
                     "data_type": "string",
                     "contains": [
@@ -6582,6 +6578,10 @@
                 {
                     "data_path": "action_result.parameter.ph_0",
                     "data_type": "ph"
+                },
+                {
+                    "data_path": "action_result.parameter.archive_password",
+                    "data_type": "password"
                 }
             ],
             "render": {
@@ -6723,10 +6723,6 @@
                     ]
                 },
                 {
-                    "data_path": "action_result.parameter.archive_password",
-                    "data_type": "password"
-                },
-                {
                     "data_path": "action_result.parameter.profile",
                     "data_type": "string",
                     "contains": [
@@ -6830,6 +6826,10 @@
                 {
                     "data_path": "action_result.parameter.ph_0",
                     "data_type": "ph"
+                },
+                {
+                    "data_path": "action_result.parameter.archive_password",
+                    "data_type": "password"
                 }
             ],
             "render": {
