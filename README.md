@@ -382,7 +382,6 @@ action_result.data.\*.HTTP.\*.RequestHeaders.User-Agent | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.accept | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.accept-language | string | | en-US |
 action_result.data.\*.HTTP.\*.RequestHeaders.content-type | string | | |
-action_result.data.\*.HTTP.\*.RequestHeaders.cookie | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.intervention | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.intuit-plugin-id | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.ms-cv | string | | 853d5c00-cc23-4de8-a912-a115a30f36aa |
@@ -390,7 +389,6 @@ action_result.data.\*.HTTP.\*.RequestHeaders.origin | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.referer | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.upgrade-insecure-requests | string | | 1 |
 action_result.data.\*.HTTP.\*.RequestHeaders.user-agent | string | | |
-action_result.data.\*.HTTP.\*.RequestHeaders.x-auth-token | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.x-requested-with | string | | |
 action_result.data.\*.HTTP.\*.RequestSize | numeric | | |
 action_result.data.\*.HTTP.\*.ResourceTaskReferences.\*.ResourceKey | string | | 1 |
@@ -1042,10 +1040,8 @@ action_result.data.\*.Resources.\*.ParentID | string | | |
 action_result.data.\*.Resources.\*.Score | numeric | | |
 action_result.data.\*.Resources.\*.Type | string | | |
 action_result.data.\*.Score | numeric | | |
-action_result.data.\*.Sharing.\*.ShareToken | string | | |
 action_result.data.\*.Sharing.\*.SharedAt | string | | |
 action_result.data.\*.Sharing.\*.SharedBy | string | | |
-action_result.data.\*.Sharing.ShareToken | string | | |
 action_result.data.\*.Sharing.SharedAt | string | | |
 action_result.data.\*.Sharing.SharedBy | string | | |
 action_result.data.\*.StartedAt | string | | |
@@ -1233,7 +1229,6 @@ action_result.data.\*.Resources.\*.ParentID | string | | c5443fd6-17f7-4456-a421
 action_result.data.\*.Resources.\*.Score | numeric | | |
 action_result.data.\*.Resources.\*.Type | string | | URL |
 action_result.data.\*.Score | numeric | | 0.15 |
-action_result.data.\*.Sharing.ShareToken | string | | |
 action_result.data.\*.Sharing.SharedAt | string | | |
 action_result.data.\*.Sharing.SharedBy | string | | |
 action_result.data.\*.StartedAt | string | | 2023-02-24T10:40:28.609Z |

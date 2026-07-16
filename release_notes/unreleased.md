@@ -3,3 +3,4 @@
 * Prevent archive passwords from being persisted in action results
 * Prevent polling failures and pagination limits from silently dropping completed jobs
 * Handle cyclic resource relationships without unbounded recursion
+* Remove share tokens, sharing links, and authentication headers before persisting API responses

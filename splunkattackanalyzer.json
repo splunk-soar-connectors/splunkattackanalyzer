@@ -1382,10 +1382,6 @@
                     "data_type": "string"
                 },
                 {
-                    "data_path": "action_result.data.*.HTTP.*.RequestHeaders.cookie",
-                    "data_type": "string"
-                },
-                {
                     "data_path": "action_result.data.*.HTTP.*.RequestHeaders.intervention",
                     "data_type": "string"
                 },
@@ -1417,10 +1413,6 @@
                 },
                 {
                     "data_path": "action_result.data.*.HTTP.*.RequestHeaders.user-agent",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*.HTTP.*.RequestHeaders.x-auth-token",
                     "data_type": "string"
                 },
                 {
@@ -5080,19 +5072,11 @@
                     "data_type": "numeric"
                 },
                 {
-                    "data_path": "action_result.data.*.Sharing.*.ShareToken",
-                    "data_type": "string"
-                },
-                {
                     "data_path": "action_result.data.*.Sharing.*.SharedAt",
                     "data_type": "string"
                 },
                 {
                     "data_path": "action_result.data.*.Sharing.*.SharedBy",
-                    "data_type": "string"
-                },
-                {
-                    "data_path": "action_result.data.*.Sharing.ShareToken",
                     "data_type": "string"
                 },
                 {
@@ -6153,10 +6137,6 @@
                     "example_values": [
                         0.15
                     ]
-                },
-                {
-                    "data_path": "action_result.data.*.Sharing.ShareToken",
-                    "data_type": "string"
                 },
                 {
                     "data_path": "action_result.data.*.Sharing.SharedAt",

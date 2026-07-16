@@ -36,6 +36,32 @@ class RetVal(tuple):
         return tuple.__new__(RetVal, (val1, val2))
 
 
+SENSITIVE_REQUEST_HEADERS = {"authorization", "proxy-authorization", "cookie", "x-api-key", "x-auth-token"}
+SENSITIVE_SHARING_FIELDS = {"sharetoken", "sharinglink"}
+
+
+def _sanitize_persisted_data(value):
+    if isinstance(value, list):
+        return [_sanitize_persisted_data(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+
+    sanitized = {}
+    for key, item in value.items():
+        normalized_key = str(key).casefold()
+        if normalized_key in SENSITIVE_SHARING_FIELDS:
+            continue
+        if normalized_key == "requestheaders" and isinstance(item, dict):
+            sanitized[key] = {
+                header: _sanitize_persisted_data(header_value)
+                for header, header_value in item.items()
+                if str(header).casefold() not in SENSITIVE_REQUEST_HEADERS
+            }
+            continue
+        sanitized[key] = _sanitize_persisted_data(item)
+    return sanitized
+
+
 def _make_resource_tree(resources):
     if not resources:
         return None
@@ -206,7 +232,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             self.debug_print(f"Exception occured: {self._get_error_message_from_exception(e)}")
             return action_result.set_status(phantom.APP_ERROR, "Unable to retrieve forensics")
 
-        action_result.add_data(job_fore)
+        action_result.add_data(_sanitize_persisted_data(job_fore))
         return action_result.set_status(phantom.APP_SUCCESS, "Job normal forensics retrieved")
 
     def _handle_get_ai_analysis(self, params):
@@ -399,7 +425,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, "Unable to get jobs")
 
         for data in job_list:
-            action_result.add_data(data)
+            action_result.add_data(_sanitize_persisted_data(data))
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_on_poll(self, params):
@@ -447,6 +473,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
     def add_to_container(self, job):
         try:
+            job = _sanitize_persisted_data(job)
             container = {}
             job_id = job["ID"]
             submission_name = job["Submission"]["Name"]
@@ -535,6 +562,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
+        job_summary = _sanitize_persisted_data(job_summary)
         job_summary["ResourceTree"] = _make_resource_tree(job_summary.get("Resources"))
         app_url = f"{self._splunkattackanalyzer._app_url}/job/{job_id}"
 
