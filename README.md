@@ -88,7 +88,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 Get screenshots for the specified job and store them in the vault
 
 Type: **investigate** <br>
-Read only: **True**
+Read only: **False**
 
 Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.
 
@@ -128,7 +128,7 @@ summary.total_objects_successful | numeric | | 2 |
 Get the PDF report for a completed job
 
 Type: **investigate** <br>
-Read only: **True**
+Read only: **False**
 
 Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.
 

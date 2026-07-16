@@ -1,2 +1,2 @@
 **Unreleased**
-* Refresh connector tooling baseline
+* Mark screenshot and PDF report actions as vault-writing operations
