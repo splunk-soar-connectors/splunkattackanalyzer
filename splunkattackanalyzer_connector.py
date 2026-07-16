@@ -37,14 +37,26 @@ class RetVal(tuple):
 
 
 def _make_resource_tree(resources):
-    root = next(root_resource for root_resource in resources if not root_resource["ParentID"])
+    if not resources:
+        return None
 
-    def _get_children(root_resource, resources):
-        root_resource["Children"] = [child_resource for child_resource in resources if child_resource["ParentID"] == root_resource["ID"]]
-        for child_resource in root_resource["Children"]:
-            _get_children(child_resource, resources)
+    root = next((resource for resource in resources if not resource.get("ParentID")), resources[0])
+    children_by_parent = {}
+    for resource in resources:
+        resource["Children"] = []
+        children_by_parent.setdefault(resource.get("ParentID"), []).append(resource)
 
-    _get_children(root, resources)
+    visited = {id(root)}
+    stack = [root]
+    while stack:
+        current = stack.pop()
+        for child in children_by_parent.get(current.get("ID"), []):
+            child_identity = id(child)
+            if child_identity in visited:
+                continue
+            visited.add(child_identity)
+            current["Children"].append(child)
+            stack.append(child)
 
     return root
 
