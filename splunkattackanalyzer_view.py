@@ -15,13 +15,19 @@
 
 
 def _tree_order_resources(current_node, ordered_resources=None, depth=0):
-    if not ordered_resources:
+    if ordered_resources is None:
         ordered_resources = []
 
-    ordered_resources.append({"depth": depth, "node": current_node})
-
-    for c in current_node["_children"]:
-        _tree_order_resources(c, ordered_resources, depth + 1)
+    visited = set()
+    stack = [(current_node, depth)]
+    while stack:
+        node, node_depth = stack.pop()
+        node_identity = id(node)
+        if node_identity in visited:
+            continue
+        visited.add(node_identity)
+        ordered_resources.append({"depth": node_depth, "node": node})
+        stack.extend((child, node_depth + 1) for child in reversed(node.get("_children", [])))
 
     return ordered_resources
 
@@ -41,7 +47,8 @@ def job_summary(provides, all_app_runs, context):
             for r in resources:
                 r["_children"] = [r2 for r2 in resources if r2["ParentID"] == r["ID"]]
 
-            ctx_result["ordered_resources"] = _tree_order_resources(next(r for r in resources if not r["ParentID"]))
+            root = next((resource for resource in resources if not resource.get("ParentID")), resources[0] if resources else None)
+            ctx_result["ordered_resources"] = _tree_order_resources(root) if root else []
 
             ctx_result["phished_brands"] = [label["Value"] for label in job["Labels"] if label["Type"] == "phished_brand"]
             ctx_result["malware_families"] = [label["Value"] for label in job["Labels"] if label["Type"] == "malware_family"]

@@ -88,7 +88,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 Get screenshots for the specified job and store them in the vault
 
 Type: **investigate** <br>
-Read only: **True**
+Read only: **False**
 
 Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.
 
@@ -128,7 +128,7 @@ summary.total_objects_successful | numeric | | 2 |
 Get the PDF report for a completed job
 
 Type: **investigate** <br>
-Read only: **True**
+Read only: **False**
 
 Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.
 
@@ -382,7 +382,6 @@ action_result.data.\*.HTTP.\*.RequestHeaders.User-Agent | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.accept | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.accept-language | string | | en-US |
 action_result.data.\*.HTTP.\*.RequestHeaders.content-type | string | | |
-action_result.data.\*.HTTP.\*.RequestHeaders.cookie | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.intervention | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.intuit-plugin-id | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.ms-cv | string | | 853d5c00-cc23-4de8-a912-a115a30f36aa |
@@ -390,7 +389,6 @@ action_result.data.\*.HTTP.\*.RequestHeaders.origin | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.referer | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.upgrade-insecure-requests | string | | 1 |
 action_result.data.\*.HTTP.\*.RequestHeaders.user-agent | string | | |
-action_result.data.\*.HTTP.\*.RequestHeaders.x-auth-token | string | | |
 action_result.data.\*.HTTP.\*.RequestHeaders.x-requested-with | string | | |
 action_result.data.\*.HTTP.\*.RequestSize | numeric | | |
 action_result.data.\*.HTTP.\*.ResourceTaskReferences.\*.ResourceKey | string | | 1 |
@@ -1042,10 +1040,8 @@ action_result.data.\*.Resources.\*.ParentID | string | | |
 action_result.data.\*.Resources.\*.Score | numeric | | |
 action_result.data.\*.Resources.\*.Type | string | | |
 action_result.data.\*.Score | numeric | | |
-action_result.data.\*.Sharing.\*.ShareToken | string | | |
 action_result.data.\*.Sharing.\*.SharedAt | string | | |
 action_result.data.\*.Sharing.\*.SharedBy | string | | |
-action_result.data.\*.Sharing.ShareToken | string | | |
 action_result.data.\*.Sharing.SharedAt | string | | |
 action_result.data.\*.Sharing.SharedBy | string | | |
 action_result.data.\*.StartedAt | string | | |
@@ -1233,7 +1229,6 @@ action_result.data.\*.Resources.\*.ParentID | string | | c5443fd6-17f7-4456-a421
 action_result.data.\*.Resources.\*.Score | numeric | | |
 action_result.data.\*.Resources.\*.Type | string | | URL |
 action_result.data.\*.Score | numeric | | 0.15 |
-action_result.data.\*.Sharing.ShareToken | string | | |
 action_result.data.\*.Sharing.SharedAt | string | | |
 action_result.data.\*.Sharing.SharedBy | string | | |
 action_result.data.\*.StartedAt | string | | 2023-02-24T10:40:28.609Z |
@@ -1288,7 +1283,6 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
 action_result.status | string | | success failed |
-action_result.parameter.archive_password | password | | |
 action_result.parameter.profile | string | `splunk attack analyzer profile` | default |
 action_result.parameter.custom_user_agent | string | | Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0 |
 action_result.parameter.file | string | `vault id` | 89b238c79f7752948b176222ae0010d0a1aa |
@@ -1303,6 +1297,7 @@ action_result.message | string | | Submitted file |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 action_result.parameter.ph_0 | ph | | |
+action_result.parameter.archive_password | password | | |
 
 ## action: 'detonate url'
 
@@ -1327,7 +1322,6 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
 action_result.status | string | | success failed |
-action_result.parameter.archive_password | password | | |
 action_result.parameter.profile | string | `splunk attack analyzer profile` | default |
 action_result.parameter.custom_user_agent | string | | Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0 |
 action_result.parameter.internet_region | string | | US Residential US |
@@ -1342,6 +1336,7 @@ action_result.message | string | | Submitted URL |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 action_result.parameter.ph_0 | ph | | |
+action_result.parameter.archive_password | password | | |
 
 ## action: 'get system tags'
 

@@ -36,15 +36,53 @@ class RetVal(tuple):
         return tuple.__new__(RetVal, (val1, val2))
 
 
+SENSITIVE_REQUEST_HEADERS = {"authorization", "proxy-authorization", "cookie", "x-api-key", "x-auth-token"}
+SENSITIVE_SHARING_FIELDS = {"sharetoken", "sharinglink"}
+
+
+def _sanitize_persisted_data(value):
+    if isinstance(value, list):
+        return [_sanitize_persisted_data(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+
+    sanitized = {}
+    for key, item in value.items():
+        normalized_key = str(key).casefold()
+        if normalized_key in SENSITIVE_SHARING_FIELDS:
+            continue
+        if normalized_key == "requestheaders" and isinstance(item, dict):
+            sanitized[key] = {
+                header: _sanitize_persisted_data(header_value)
+                for header, header_value in item.items()
+                if str(header).casefold() not in SENSITIVE_REQUEST_HEADERS
+            }
+            continue
+        sanitized[key] = _sanitize_persisted_data(item)
+    return sanitized
+
+
 def _make_resource_tree(resources):
-    root = next(root_resource for root_resource in resources if not root_resource["ParentID"])
+    if not resources:
+        return None
 
-    def _get_children(root_resource, resources):
-        root_resource["Children"] = [child_resource for child_resource in resources if child_resource["ParentID"] == root_resource["ID"]]
-        for child_resource in root_resource["Children"]:
-            _get_children(child_resource, resources)
+    root = next((resource for resource in resources if not resource.get("ParentID")), resources[0])
+    children_by_parent = {}
+    for resource in resources:
+        resource["Children"] = []
+        children_by_parent.setdefault(resource.get("ParentID"), []).append(resource)
 
-    _get_children(root, resources)
+    visited = {id(root)}
+    stack = [root]
+    while stack:
+        current = stack.pop()
+        for child in children_by_parent.get(current.get("ID"), []):
+            child_identity = id(child)
+            if child_identity in visited:
+                continue
+            visited.add(child_identity)
+            current["Children"].append(child)
+            stack.append(child)
 
     return root
 
@@ -171,7 +209,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
     def _handle_splunk_attack_analyzer_get_job_normalized_forensics(self, params):
         self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
-        action_result = self.add_action_result(ActionResult(dict(params)))
+        sanitized_params = {key: value for key, value in params.items() if key != "archive_password"}
+        action_result = self.add_action_result(ActionResult(sanitized_params))
 
         ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout")
         if phantom.is_fail(ret_val):
@@ -193,13 +232,14 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             self.debug_print(f"Exception occured: {self._get_error_message_from_exception(e)}")
             return action_result.set_status(phantom.APP_ERROR, "Unable to retrieve forensics")
 
-        action_result.add_data(job_fore)
+        action_result.add_data(_sanitize_persisted_data(job_fore))
         return action_result.set_status(phantom.APP_SUCCESS, "Job normal forensics retrieved")
 
     def _handle_get_ai_analysis(self, params):
         self.save_progress(f"In action handler for: {self.get_action_identifier()}")
 
-        action_result = self.add_action_result(ActionResult(dict(params)))
+        sanitized_params = {key: value for key, value in params.items() if key != "archive_password"}
+        action_result = self.add_action_result(ActionResult(sanitized_params))
 
         ret_val, timeout_in_minutes = _validate_integer(action_result, params.get("timeout", 0), "timeout")
         if phantom.is_fail(ret_val):
@@ -385,7 +425,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, "Unable to get jobs")
 
         for data in job_list:
-            action_result.add_data(data)
+            action_result.add_data(_sanitize_persisted_data(data))
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def _handle_on_poll(self, params):
@@ -406,7 +446,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                 self.debug_print("State file is corrupted, resetting the file")
                 self.save_progress("State file is corrupted, resetting the file")
                 self._state = {"app_version": self.get_app_json().get("app_version")}
-                self._handle_on_poll(params)
+                return self._handle_on_poll(params)
 
         ret_val, limit = _validate_integer(action_result, params.get("container_count", 0), "container_count")
         if phantom.is_fail(ret_val):
@@ -418,63 +458,74 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             self.debug_print(f"Exception occured: {self._get_error_message_from_exception(e)}")
             return action_result.set_status(phantom.APP_ERROR, "Unable to get jobs")
         if payload:
-            for job in payload:
-                self.add_to_container(job)
+            checkpoint = None
+            for job in sorted(payload, key=lambda item: item.get("UpdatedAt") or ""):
+                if not self.add_to_container(job):
+                    break
+                checkpoint = job.get("UpdatedAt")
             if not manual_polling:
-                self._state["UpdatedAt_Checkpoint"] = payload[0].get("UpdatedAt")
+                if checkpoint:
+                    self._state["UpdatedAt_Checkpoint"] = checkpoint
                 self.save_state(self._state)
         else:
             self.debug_print("payload_empty")
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def add_to_container(self, job):
-        container = {}
-        job_id = job["ID"]
-        submission_name = job["Submission"]["Name"]
-        container["name"] = submission_name
-        container["source_data_identifier"] = job_id
-        container["run_automation"] = True
-        container["data"] = job
-        container["artifacts"] = []
+        try:
+            job = _sanitize_persisted_data(job)
+            container = {}
+            job_id = job["ID"]
+            submission_name = job["Submission"]["Name"]
+            container["name"] = submission_name
+            container["source_data_identifier"] = job_id
+            container["run_automation"] = True
+            container["data"] = job
+            container["artifacts"] = []
 
-        for resource in job["Resources"]:
-            severity = "low"
-            if resource["DisplayScore"] >= 70:
-                severity = "high"
-            elif resource["DisplayScore"] >= 30:
-                severity = "medium"
+            for resource in job["Resources"]:
+                severity = "low"
+                if resource["DisplayScore"] >= 70:
+                    severity = "high"
+                elif resource["DisplayScore"] >= 30:
+                    severity = "medium"
 
-            if resource["Type"] == "URL":
-                container["artifacts"].append(
-                    {
-                        "cef": {"requestURL": resource["Name"], "data": resource},
-                        "label": "url",
-                        "name": resource["Name"],
-                        "severity": severity,
-                        "type": "url",
-                    }
-                )
-            elif resource["Type"] == "file":
-                container["artifacts"].append(
-                    {
-                        "cef": {
-                            "fileName": resource["Name"],
-                            "fileHash": resource["FileMetadata"]["SHA256"],
-                            "fileSize": resource["FileMetadata"]["Size"],
-                            "fileType": resource["FileMetadata"]["MimeType"],
-                            "data": resource,
-                        },
-                        "label": "file",
-                        "name": resource["Name"],
-                        "severity": severity,
-                        "type": "file",
-                    }
-                )
+                if resource["Type"] == "URL":
+                    container["artifacts"].append(
+                        {
+                            "cef": {"requestURL": resource["Name"], "data": resource},
+                            "label": "url",
+                            "name": resource["Name"],
+                            "severity": severity,
+                            "type": "url",
+                        }
+                    )
+                elif resource["Type"] == "file":
+                    container["artifacts"].append(
+                        {
+                            "cef": {
+                                "fileName": resource["Name"],
+                                "fileHash": resource["FileMetadata"]["SHA256"],
+                                "fileSize": resource["FileMetadata"]["Size"],
+                                "fileType": resource["FileMetadata"]["MimeType"],
+                                "data": resource,
+                            },
+                            "label": "file",
+                            "name": resource["Name"],
+                            "severity": severity,
+                            "type": "file",
+                        }
+                    )
+        except Exception as e:
+            self.save_progress(f"Error preparing container: {self._get_error_message_from_exception(e)}")
+            return False
 
         ret_val, msg, cid = self.save_container(container)
         if phantom.is_fail(ret_val):
             self.save_progress(f"Error saving container: {msg}")
             self.debug_print(f"Error saving container: {msg} -- CID: {cid}")
+            return False
+        return True
 
     def _get_job_data(self, action_result, job_id, timeout_in_minutes):
         start_time = time.time()
@@ -511,6 +562,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
+        job_summary = _sanitize_persisted_data(job_summary)
         job_summary["ResourceTree"] = _make_resource_tree(job_summary.get("Resources"))
         app_url = f"{self._splunkattackanalyzer._app_url}/job/{job_id}"
 

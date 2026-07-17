@@ -14,8 +14,7 @@
 # and limitations under the License.
 
 import json
-import time
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import requests
 
@@ -24,6 +23,8 @@ import requests
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 API_VERSION = "v1"
 REQUEST_TIMEOUT = 60
+MAX_POLL_PAGES = 100
+MAX_POLL_JOBS = 10000
 
 
 class AuthenticationException(Exception):
@@ -74,35 +75,36 @@ class SplunkAttackAnalyzer:
 
     def poll_for_done_jobs(self, limit, checkpoint):
         url = f"{self._host}/jobs/poll"
-        time_now = datetime.now()
-        jobs = []
-
-        try:
-            jobs = self.poll_paginate(url, limit, time_now, checkpoint)
-        except Exception:
-            time.sleep(10)
-
-        return jobs
+        return self.poll_paginate(url, limit, datetime.now(UTC), checkpoint)
 
     def poll_paginate(self, url, limit, action_start_time, checkpoint):
         job_list = list()
         epoch_convert_time = None
         if checkpoint:
+            if checkpoint.tzinfo is None:
+                checkpoint = checkpoint.replace(tzinfo=UTC)
             epoch_convert_time = checkpoint.timestamp()
 
         if not epoch_convert_time:
             epoch_convert_time = (action_start_time - timedelta(hours=self._since)).timestamp()
         param = {"since": int(epoch_convert_time)}
-        while True:
-            resp = requests.get(url, params=param, headers=self.get_header(), timeout=REQUEST_TIMEOUT)
+        for _ in range(MAX_POLL_PAGES):
+            resp = requests.get(url, params=param, headers=self.get_header(), verify=self._verify, proxies=self._proxy, timeout=REQUEST_TIMEOUT)
+            resp.raise_for_status()
             resp_json = resp.json()
-            job_list.extend(resp_json.get("Jobs"))
-            if not resp_json.get("Jobs"):
+            jobs = resp_json.get("Jobs") or []
+            job_list.extend(jobs)
+            if len(job_list) > MAX_POLL_JOBS:
+                raise RuntimeError(f"Polling returned more than {MAX_POLL_JOBS} jobs")
+            next_token = resp_json.get("NextToken")
+            if not jobs or not next_token:
                 break
-            if limit and limit <= len(job_list):
-                return job_list[:limit]
-            param = {"token": resp_json.get("NextToken")}
-        return job_list
+            param = {"token": next_token}
+        else:
+            raise RuntimeError(f"Polling exceeded the {MAX_POLL_PAGES}-page safety limit")
+
+        job_list.sort(key=lambda job: job.get("UpdatedAt") or "")
+        return job_list[:limit] if limit else job_list
 
     def get_engines(self):
         url = f"{self._host}/engines"
