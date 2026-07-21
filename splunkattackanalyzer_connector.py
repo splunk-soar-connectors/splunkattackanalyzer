@@ -39,12 +39,18 @@ class RetVal(tuple):
 
 SENSITIVE_REQUEST_HEADERS = {"authorization", "proxy-authorization", "cookie", "x-api-key", "x-auth-token"}
 SENSITIVE_SHARING_FIELDS = {"sharetoken", "sharinglink"}
+PDF_SIGNATURE = b"%PDF-"
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 
 
 def _strip_unicode_format_controls(value):
     if not isinstance(value, str):
         return value
     return "".join(character for character in value if unicodedata.category(character) != "Cf")
+
+
+def _has_expected_download_signature(data, signature):
+    return isinstance(data, (bytes, bytearray)) and bool(data) and data.startswith(signature)
 
 
 def _sanitize_persisted_data(value):
@@ -603,6 +609,8 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         try:
             pdf_data = self._splunkattackanalyzer.download_job_pdf(job_id)
+            if not _has_expected_download_signature(pdf_data, PDF_SIGNATURE):
+                return action_result.set_status(phantom.APP_ERROR, "Downloaded PDF report is empty or is not a PDF")
 
             vault_detail = self._add_to_vault(data=pdf_data, filename=f"Splunk Attack Analyzer job report {job_id}.pdf")
             vault_detail["file_name"] = f"Splunk Attack Analyzer job report {job_id}.pdf"
@@ -639,6 +647,9 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                 self.save_progress(f"Downloading screenshot #{i}")
 
                 shot_data = self._splunkattackanalyzer.download_artifact(ss["ArtifactPath"])
+                if not _has_expected_download_signature(shot_data, PNG_SIGNATURE):
+                    return action_result.set_status(phantom.APP_ERROR, "Downloaded screenshot is empty or is not a PNG")
+
                 vault_detail = self._add_to_vault(shot_data, f"Splunk Attack Analyzer screenshot {job_id} #{i}.png")
                 vault_detail["file_name"] = f"Splunk Attack Analyzer screenshot {job_id} #{i}.png"
                 action_result.add_data(vault_detail)
