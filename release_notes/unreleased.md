@@ -1,1 +1,4 @@
 **Unreleased**
+
+* Stripped Unicode format controls from Attack Analyzer job data before persistence. [PSAAS-33118]
+* Rejected invalid PDF reports and screenshots before adding them to the vault. [PSAAS-33443]
