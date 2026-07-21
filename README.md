@@ -1,7 +1,7 @@
 # Splunk Attack Analyzer Connector for Splunk SOAR
 
 Publisher: Splunk <br>
-Connector Version: 2.2.2 <br>
+Connector Version: 2.2.3 <br>
 Product Vendor: Splunk <br>
 Product Name: Splunk Attack Analyzer <br>
 Minimum Product Version: 8.6.0
