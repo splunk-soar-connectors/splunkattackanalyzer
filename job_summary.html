@@ -130,45 +130,45 @@
                   <td>
                     {% for brand in result.phished_brands %}<span class="tag">{{ brand }}</span>{% endfor %}
                   </td>
-                {% endif %}
-                {% if result.phishkit_families %}
-                  <tr>
-                    <th>Phish Kit Families</th>
-                    <td>
-                      {% for family in result.phishkit_families %}<span class="tag">{{ family }}</span>{% endfor %}
-                    </td>
-                  {% endif %}
-                  {% if result.malware_families %}
-                    <tr>
-                      <th>Malware Families</th>
-                      <td>
-                        {% for family in result.malware_families %}<span class="tag">{{ family }}</span>{% endfor %}
-                      </td>
-                    {% endif %}
-                    {% if job.State != "done" %}
-                      <tr>
-                        <th>Job State</th>
-                        <td>{{ job.State }}</td>
-                      </tr>
-                    {% endif %}
-                  </tbody>
-                </table>
-                <h3>Resources Analyzed</h3>
-                <div class="treelist">
-                  <ul class="root">
-                    {% for r in result.ordered_resources %}
-                      <li>
-                        <div class="resource" style="margin-left: {{ r.depth }}em;">
-                          <i class="fa fa-caret-right"></i>&nbsp;
-                          {% if r.node.DisplayScore >= 70 %}<i class="fa fa-exclamation-circle"></i>&nbsp;{% endif %}
-                          <span class="resource-title">{{ r.node.Name }}</span>
-                        </div>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                </div>
-              {% endwith %}
-            {% endfor %}
-          {% endif %}
-        </div>
-      {% endblock %}
+              {% endif %}
+              {% if result.phishkit_families %}
+                <tr>
+                  <th>Phish Kit Families</th>
+                  <td>
+                    {% for family in result.phishkit_families %}<span class="tag">{{ family }}</span>{% endfor %}
+                  </td>
+              {% endif %}
+              {% if result.malware_families %}
+                <tr>
+                  <th>Malware Families</th>
+                  <td>
+                    {% for family in result.malware_families %}<span class="tag">{{ family }}</span>{% endfor %}
+                  </td>
+              {% endif %}
+              {% if job.State != "done" %}
+                <tr>
+                  <th>Job State</th>
+                  <td>{{ job.State }}</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+          <h3>Resources Analyzed</h3>
+          <div class="treelist">
+            <ul class="root">
+              {% for r in result.ordered_resources %}
+                <li>
+                  <div class="resource" style="margin-left: {{ r.depth }}em;">
+                    <i class="fa fa-caret-right"></i>&nbsp;
+                    {% if r.node.DisplayScore >= 70 %}<i class="fa fa-exclamation-circle"></i>&nbsp;{% endif %}
+                    <span class="resource-title">{{ r.node.Name }}</span>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+  </div>
+{% endblock %}

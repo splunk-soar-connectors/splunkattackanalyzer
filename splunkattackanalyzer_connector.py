@@ -15,10 +15,10 @@
 
 import json
 import sys
-import unicodedata
 
 # Phantom App imports
 import time
+import unicodedata
 from datetime import datetime
 
 import phantom.app as phantom
