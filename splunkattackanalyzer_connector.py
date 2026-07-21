@@ -15,6 +15,7 @@
 
 import json
 import sys
+import unicodedata
 
 # Phantom App imports
 import time
@@ -40,7 +41,15 @@ SENSITIVE_REQUEST_HEADERS = {"authorization", "proxy-authorization", "cookie", "
 SENSITIVE_SHARING_FIELDS = {"sharetoken", "sharinglink"}
 
 
+def _strip_unicode_format_controls(value):
+    if not isinstance(value, str):
+        return value
+    return "".join(character for character in value if unicodedata.category(character) != "Cf")
+
+
 def _sanitize_persisted_data(value):
+    if isinstance(value, str):
+        return _strip_unicode_format_controls(value)
     if isinstance(value, list):
         return [_sanitize_persisted_data(item) for item in value]
     if not isinstance(value, dict):
@@ -179,7 +188,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
     def _add_to_vault(self, data, filename):
         # this temp directory uses "V" since this function is from the CLASS instance not the same as the "v" vault instance
         container_id = self.get_container_id()
-        return Vault.create_attachment(data, container_id, file_name=filename)
+        return Vault.create_attachment(data, container_id, file_name=_strip_unicode_format_controls(filename))
 
     def _handle_test_connectivity(self, param):
         self.debug_print(f"In action handler for: {self.get_action_identifier()}")
