@@ -15,6 +15,7 @@
 
 import json
 from datetime import UTC, datetime, timedelta
+from urllib.parse import urlsplit, urlunsplit
 
 import requests
 
@@ -27,6 +28,33 @@ MAX_POLL_PAGES = 100
 MAX_POLL_JOBS = 10000
 MAX_DOWNLOAD_SIZE = 100 * 1024 * 1024
 DOWNLOAD_CHUNK_SIZE = 1024 * 1024
+
+
+def _normalize_app_url(app_url):
+    try:
+        parsed = urlsplit(app_url)
+        hostname = parsed.hostname
+        port = parsed.port
+    except (TypeError, ValueError) as exc:
+        raise ValueError("App URL is not a valid URL") from exc
+
+    if (
+        parsed.scheme.casefold() != "https"
+        or not hostname
+        or not hostname.casefold().startswith("app.")
+        or parsed.username
+        or parsed.password
+        or parsed.path not in ("", "/")
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise ValueError("App URL must be an HTTPS origin whose hostname starts with 'app.'")
+
+    hostname = hostname.casefold()
+    app_netloc = hostname if port is None else f"{hostname}:{port}"
+    api_hostname = f"api.{hostname[4:]}"
+    api_netloc = api_hostname if port is None else f"{api_hostname}:{port}"
+    return urlunsplit(("https", app_netloc, "", "", "")), urlunsplit(("https", api_netloc, "", "", ""))
 
 
 def _read_bounded_response(response):
@@ -53,8 +81,7 @@ class AuthenticationException(Exception):
 
 class SplunkAttackAnalyzer:
     def __init__(self, config):
-        self._app_url = config.get("app_url", "https://app.twinwave.io")
-        self._api_host = self._app_url.replace("app", "api")
+        self._app_url, self._api_host = _normalize_app_url(config.get("app_url", "https://app.twinwave.io"))
         self._host = f"{self._api_host}/{API_VERSION}"
 
         self._api_key = config["api_token"]

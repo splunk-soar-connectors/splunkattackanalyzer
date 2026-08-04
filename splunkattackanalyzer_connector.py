@@ -13,6 +13,7 @@
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 
+import hashlib
 import json
 import sys
 
@@ -165,8 +166,28 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             return self.get_status()
 
-        # Use the config to initialize fortisiem object to handle connections to the fortisiem server
-        self._splunkattackanalyzer = SplunkAttackAnalyzer(config)
+        try:
+            splunkattackanalyzer = SplunkAttackAnalyzer(config)
+        except ValueError as exc:
+            return self.set_status(phantom.APP_ERROR, str(exc))
+
+        api_token_fingerprint = hashlib.sha256(config["api_token"].encode()).hexdigest()
+        credential_binding = self._state.get("credential_binding")
+        if (
+            isinstance(credential_binding, dict)
+            and credential_binding.get("api_token_sha256") == api_token_fingerprint
+            and credential_binding.get("api_host") != splunkattackanalyzer._api_host
+        ):
+            return self.set_status(
+                phantom.APP_ERROR,
+                "The App URL changed while the API token remained unchanged. Rotate the token and update both fields together.",
+            )
+
+        self._state["credential_binding"] = {
+            "api_host": splunkattackanalyzer._api_host,
+            "api_token_sha256": api_token_fingerprint,
+        }
+        self._splunkattackanalyzer = splunkattackanalyzer
 
         return phantom.APP_SUCCESS
 

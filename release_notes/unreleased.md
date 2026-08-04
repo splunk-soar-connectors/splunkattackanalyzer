@@ -3,3 +3,5 @@
 * Return an error when an Attack Analyzer analysis job has not reached the done state.
 
 * Limit downloaded Attack Analyzer PDF reports and screenshots to 100 MiB before adding them to the vault.
+
+* Require HTTPS Attack Analyzer app origins and API token rotation when the configured endpoint changes.
