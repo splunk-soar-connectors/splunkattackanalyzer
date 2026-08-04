@@ -20,7 +20,6 @@ import sys
 # Phantom App imports
 import time
 import unicodedata
-from datetime import datetime
 
 import phantom.app as phantom
 import requests
@@ -29,7 +28,7 @@ from phantom.action_result import ActionResult
 from phantom.base_connector import BaseConnector
 from phantom.vault import Vault
 
-from phsplunkattackanalyzer import SplunkAttackAnalyzer
+from phsplunkattackanalyzer import SplunkAttackAnalyzer, normalize_updated_at, parse_updated_at, updated_at_sort_key
 from splunkattackanalyzer_consts import *
 
 
@@ -477,12 +476,12 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             checkpoint = self._state.get("UpdatedAt_Checkpoint")
             try:
                 if checkpoint:
-                    datetime_checkpoint = datetime.strptime(checkpoint, "%Y-%m-%dT%H:%M:%S.%fZ")
-            except:
+                    datetime_checkpoint = parse_updated_at(checkpoint)
+            except (TypeError, ValueError):
                 self.debug_print("State file is corrupted, resetting the file")
                 self.save_progress("State file is corrupted, resetting the file")
-                self._state = {"app_version": self.get_app_json().get("app_version")}
-                return self._handle_on_poll(params)
+                self._state.pop("UpdatedAt_Checkpoint", None)
+                self.save_state(self._state)
 
         ret_val, limit = _validate_integer(action_result, params.get("container_count", 0), "container_count")
         if phantom.is_fail(ret_val):
@@ -495,10 +494,13 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, "Unable to get jobs")
         if payload:
             checkpoint = None
-            for job in sorted(payload, key=lambda item: item.get("UpdatedAt") or ""):
+            for job in sorted(payload, key=updated_at_sort_key):
                 if not self.add_to_container(job):
                     break
-                checkpoint = job.get("UpdatedAt")
+                try:
+                    checkpoint = normalize_updated_at(job.get("UpdatedAt"))
+                except (TypeError, ValueError):
+                    self.debug_print("Ignoring malformed or future UpdatedAt value while advancing the poll checkpoint")
             if not manual_polling:
                 if checkpoint:
                     self._state["UpdatedAt_Checkpoint"] = checkpoint

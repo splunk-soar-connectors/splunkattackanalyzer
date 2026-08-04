@@ -14,7 +14,7 @@
 # and limitations under the License.
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlsplit, urlunsplit
 
 import requests
@@ -28,6 +28,7 @@ MAX_POLL_PAGES = 100
 MAX_POLL_JOBS = 10000
 MAX_DOWNLOAD_SIZE = 100 * 1024 * 1024
 DOWNLOAD_CHUNK_SIZE = 1024 * 1024
+CHECKPOINT_FUTURE_TOLERANCE = timedelta(minutes=5)
 
 
 def _normalize_app_url(app_url):
@@ -55,6 +56,39 @@ def _normalize_app_url(app_url):
     api_hostname = f"api.{hostname[4:]}"
     api_netloc = api_hostname if port is None else f"{api_hostname}:{port}"
     return urlunsplit(("https", app_netloc, "", "", "")), urlunsplit(("https", api_netloc, "", "", ""))
+
+
+def parse_updated_at(value):
+    if not isinstance(value, str) or not value.endswith("Z"):
+        raise ValueError("UpdatedAt must be a UTC RFC3339 timestamp")
+
+    timestamp = value[:-1]
+    if "." in timestamp:
+        timestamp, fraction = timestamp.rsplit(".", 1)
+        if not fraction.isdigit() or len(fraction) > 9:
+            raise ValueError("UpdatedAt has invalid fractional seconds")
+        fraction = fraction[:6].ljust(6, "0")
+        normalized_value = f"{timestamp}.{fraction}Z"
+        time_format = "%Y-%m-%dT%H:%M:%S.%fZ"
+    else:
+        normalized_value = value
+        time_format = "%Y-%m-%dT%H:%M:%SZ"
+
+    parsed = datetime.strptime(normalized_value, time_format).replace(tzinfo=timezone.utc)
+    if parsed > datetime.now(timezone.utc) + CHECKPOINT_FUTURE_TOLERANCE:
+        raise ValueError("UpdatedAt is in the future")
+    return parsed
+
+
+def normalize_updated_at(value):
+    return parse_updated_at(value).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def updated_at_sort_key(job):
+    try:
+        return parse_updated_at(job.get("UpdatedAt")).timestamp()
+    except (AttributeError, TypeError, ValueError):
+        return float("-inf")
 
 
 def _read_bounded_response(response):
@@ -122,14 +156,14 @@ class SplunkAttackAnalyzer:
 
     def poll_for_done_jobs(self, limit, checkpoint):
         url = f"{self._host}/jobs/poll"
-        return self.poll_paginate(url, limit, datetime.now(UTC), checkpoint)
+        return self.poll_paginate(url, limit, datetime.now(timezone.utc), checkpoint)
 
     def poll_paginate(self, url, limit, action_start_time, checkpoint):
         job_list = list()
         epoch_convert_time = None
         if checkpoint:
             if checkpoint.tzinfo is None:
-                checkpoint = checkpoint.replace(tzinfo=UTC)
+                checkpoint = checkpoint.replace(tzinfo=timezone.utc)
             epoch_convert_time = checkpoint.timestamp()
 
         if not epoch_convert_time:
@@ -150,7 +184,7 @@ class SplunkAttackAnalyzer:
         else:
             raise RuntimeError(f"Polling exceeded the {MAX_POLL_PAGES}-page safety limit")
 
-        job_list.sort(key=lambda job: job.get("UpdatedAt") or "")
+        job_list.sort(key=updated_at_sort_key)
         return job_list[:limit] if limit else job_list
 
     def get_engines(self):

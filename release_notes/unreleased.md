@@ -5,3 +5,5 @@
 * Limit downloaded Attack Analyzer PDF reports and screenshots to 100 MiB before adding them to the vault.
 
 * Require HTTPS Attack Analyzer app origins and API token rotation when the configured endpoint changes.
+
+* Validate and normalize Attack Analyzer poll checkpoints while recovering corrupted state without recursive polling.
