@@ -18,6 +18,7 @@ SPLUNK_ATTACK_ANALYZER_VALIDATE_USER_AGENT_MESSAGE = "Please provide a valid val
 SPLUNK_ATTACK_ANALYZER_VALIDATE_NON_NEGATIVE_INTEGER_MESSAGE = "Please provide a valid non-negative integer value in the '{0}' parameter"
 SPLUNK_ATTACK_ANALYZER_VALIDATE_EXIT_REGION_MESSAGE = "Please provide a valid value of 'Internet Region' parameter from {0}"
 SPLUNK_ATTACK_ANALYZER_VALIDATE_JOB_STATE = "Unable to {0}. The job is still in in-progress state"
+SPLUNK_ATTACK_ANALYZER_JOB_NOT_COMPLETE = "The job is in state '{0}' and has not completed analysis"
 SPLUNK_ATTACK_ANALYZER_TIMEOUT_ERROR = "Timed out while waiting for job to be completed. Please retry the action again after sometime"
 JOB_POLL_INTERVAL = 30
 SPLUNK_ATTACK_ANALYZER_ERROR_MESSAGE_UNAVAILABLE = "Error message unavailable. \

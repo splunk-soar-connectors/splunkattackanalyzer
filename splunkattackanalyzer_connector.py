@@ -547,14 +547,17 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         while True:
             try:
                 job_summary = self._splunkattackanalyzer.get_job(job_id)
+                job_state = job_summary.get("State")
 
-                if not timeout_in_minutes:
+                if job_state == "done":
                     return job_summary, action_result.set_status(phantom.APP_SUCCESS)
-                elif job_summary.get("State") == "done":
-                    return job_summary, action_result.set_status(phantom.APP_SUCCESS)
-                elif time.time() < start_time + timeout_in_minutes * 60:
+                elif timeout_in_minutes and time.time() < start_time + timeout_in_minutes * 60:
                     time.sleep(JOB_POLL_INTERVAL)
                     continue
+                elif not timeout_in_minutes:
+                    return None, action_result.set_status(
+                        phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_JOB_NOT_COMPLETE.format(job_state or "unknown")
+                    )
                 else:
                     return None, action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_TIMEOUT_ERROR)
             except Exception as e:
