@@ -1297,7 +1297,6 @@ action_result.message | string | | Submitted file |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 action_result.parameter.ph_0 | ph | | |
-action_result.parameter.archive_password | password | | |
 
 ## action: 'detonate url'
 
@@ -1336,7 +1335,6 @@ action_result.message | string | | Submitted URL |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 action_result.parameter.ph_0 | ph | | |
-action_result.parameter.archive_password | password | | |
 
 ## action: 'get system tags'
 
