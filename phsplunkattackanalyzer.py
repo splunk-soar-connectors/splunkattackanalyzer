@@ -25,6 +25,26 @@ API_VERSION = "v1"
 REQUEST_TIMEOUT = 60
 MAX_POLL_PAGES = 100
 MAX_POLL_JOBS = 10000
+MAX_DOWNLOAD_SIZE = 100 * 1024 * 1024
+DOWNLOAD_CHUNK_SIZE = 1024 * 1024
+
+
+def _read_bounded_response(response):
+    try:
+        content_length = response.headers.get("Content-Length")
+        if content_length is not None and int(content_length) > MAX_DOWNLOAD_SIZE:
+            raise ValueError(f"Download exceeds the {MAX_DOWNLOAD_SIZE}-byte size limit")
+
+        content = bytearray()
+        for chunk in response.iter_content(chunk_size=DOWNLOAD_CHUNK_SIZE):
+            if not chunk:
+                continue
+            if len(content) + len(chunk) > MAX_DOWNLOAD_SIZE:
+                raise ValueError(f"Download exceeds the {MAX_DOWNLOAD_SIZE}-byte size limit")
+            content.extend(chunk)
+        return bytes(content)
+    finally:
+        response.close()
 
 
 class AuthenticationException(Exception):
@@ -158,13 +178,13 @@ class SplunkAttackAnalyzer:
         url = f"{self._host}/jobs/{job_id}/pdfreport"
         resp = requests.get(url, headers=self.get_header(), verify=self._verify, proxies=self._proxy, stream=True, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
-        return resp.content
+        return _read_bounded_response(resp)
 
     def download_artifact(self, artifact_path):
         url = f"{self._host}/jobs/artifacts/{artifact_path}"
         resp = requests.get(url, headers=self.get_header(), verify=self._verify, proxies=self._proxy, stream=True, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
-        return resp.content
+        return _read_bounded_response(resp)
 
     def format_parameters_for_submission(self, param_dict):
         if not param_dict:
