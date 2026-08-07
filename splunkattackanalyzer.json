@@ -25,7 +25,7 @@
         "app_url": {
             "order": 0,
             "data_type": "string",
-            "description": "App URL to access Attack Analyzer. If not specified, defaults to https://app.twinwave.io",
+            "description": "HTTPS app origin for Attack Analyzer. The hostname must start with app. and changing it requires rotating the API token. Defaults to https://app.twinwave.io",
             "default": "https://app.twinwave.io"
         },
         "api_token": {
@@ -6558,10 +6558,6 @@
                 {
                     "data_path": "action_result.parameter.ph_0",
                     "data_type": "ph"
-                },
-                {
-                    "data_path": "action_result.parameter.archive_password",
-                    "data_type": "password"
                 }
             ],
             "render": {
@@ -6806,10 +6802,6 @@
                 {
                     "data_path": "action_result.parameter.ph_0",
                     "data_type": "ph"
-                },
-                {
-                    "data_path": "action_result.parameter.archive_password",
-                    "data_type": "password"
                 }
             ],
             "render": {

@@ -65,7 +65,7 @@ This table lists the configuration variables required to operate Splunk Attack A
 
 VARIABLE | REQUIRED | TYPE | DESCRIPTION
 -------- | -------- | ---- | -----------
-**app_url** | optional | string | App URL to access Attack Analyzer. If not specified, defaults to https://app.twinwave.io |
+**app_url** | optional | string | HTTPS app origin for Attack Analyzer. The hostname must start with app. and changing it requires rotating the API token. Defaults to https://app.twinwave.io |
 **api_token** | required | password | API token from the app |
 **since** | optional | numeric | Start of time range stated in hours. If not specified, the default is past 24 hours |
 
@@ -1297,7 +1297,6 @@ action_result.message | string | | Submitted file |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 action_result.parameter.ph_0 | ph | | |
-action_result.parameter.archive_password | password | | |
 
 ## action: 'detonate url'
 
@@ -1336,7 +1335,6 @@ action_result.message | string | | Submitted URL |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 action_result.parameter.ph_0 | ph | | |
-action_result.parameter.archive_password | password | | |
 
 ## action: 'get system tags'
 

@@ -14,7 +14,8 @@
 # and limitations under the License.
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from urllib.parse import urlsplit, urlunsplit
 
 import requests
 
@@ -25,6 +26,87 @@ API_VERSION = "v1"
 REQUEST_TIMEOUT = 60
 MAX_POLL_PAGES = 100
 MAX_POLL_JOBS = 10000
+MAX_DOWNLOAD_SIZE = 100 * 1024 * 1024
+DOWNLOAD_CHUNK_SIZE = 1024 * 1024
+CHECKPOINT_FUTURE_TOLERANCE = timedelta(minutes=5)
+
+
+def _normalize_app_url(app_url):
+    try:
+        parsed = urlsplit(app_url)
+        hostname = parsed.hostname
+        port = parsed.port
+    except (TypeError, ValueError) as exc:
+        raise ValueError("App URL is not a valid URL") from exc
+
+    if (
+        parsed.scheme.casefold() != "https"
+        or not hostname
+        or not hostname.casefold().startswith("app.")
+        or parsed.username
+        or parsed.password
+        or parsed.path not in ("", "/")
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise ValueError("App URL must be an HTTPS origin whose hostname starts with 'app.'")
+
+    hostname = hostname.casefold()
+    app_netloc = hostname if port is None else f"{hostname}:{port}"
+    api_hostname = f"api.{hostname[4:]}"
+    api_netloc = api_hostname if port is None else f"{api_hostname}:{port}"
+    return urlunsplit(("https", app_netloc, "", "", "")), urlunsplit(("https", api_netloc, "", "", ""))
+
+
+def parse_updated_at(value):
+    if not isinstance(value, str) or not value.endswith("Z"):
+        raise ValueError("UpdatedAt must be a UTC RFC3339 timestamp")
+
+    timestamp = value[:-1]
+    if "." in timestamp:
+        timestamp, fraction = timestamp.rsplit(".", 1)
+        if not fraction.isdigit() or len(fraction) > 9:
+            raise ValueError("UpdatedAt has invalid fractional seconds")
+        fraction = fraction[:6].ljust(6, "0")
+        normalized_value = f"{timestamp}.{fraction}Z"
+        time_format = "%Y-%m-%dT%H:%M:%S.%fZ"
+    else:
+        normalized_value = value
+        time_format = "%Y-%m-%dT%H:%M:%SZ"
+
+    parsed = datetime.strptime(normalized_value, time_format).replace(tzinfo=timezone.utc)
+    if parsed > datetime.now(timezone.utc) + CHECKPOINT_FUTURE_TOLERANCE:
+        raise ValueError("UpdatedAt is in the future")
+    return parsed
+
+
+def normalize_updated_at(value):
+    return parse_updated_at(value).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def updated_at_sort_key(job):
+    try:
+        return parse_updated_at(job.get("UpdatedAt")).timestamp()
+    except (AttributeError, TypeError, ValueError):
+        return float("-inf")
+
+
+def _read_bounded_response(response):
+    try:
+        content_length = response.headers.get("Content-Length")
+        if content_length is not None and int(content_length) > MAX_DOWNLOAD_SIZE:
+            raise ValueError(f"Download exceeds the {MAX_DOWNLOAD_SIZE}-byte size limit")
+
+        content = bytearray()
+        for chunk in response.iter_content(chunk_size=DOWNLOAD_CHUNK_SIZE):
+            if not chunk:
+                continue
+            if len(content) + len(chunk) > MAX_DOWNLOAD_SIZE:
+                raise ValueError(f"Download exceeds the {MAX_DOWNLOAD_SIZE}-byte size limit")
+            content.extend(chunk)
+        return bytes(content)
+    finally:
+        response.close()
 
 
 class AuthenticationException(Exception):
@@ -33,8 +115,7 @@ class AuthenticationException(Exception):
 
 class SplunkAttackAnalyzer:
     def __init__(self, config):
-        self._app_url = config.get("app_url", "https://app.twinwave.io")
-        self._api_host = self._app_url.replace("app", "api")
+        self._app_url, self._api_host = _normalize_app_url(config.get("app_url", "https://app.twinwave.io"))
         self._host = f"{self._api_host}/{API_VERSION}"
 
         self._api_key = config["api_token"]
@@ -75,14 +156,14 @@ class SplunkAttackAnalyzer:
 
     def poll_for_done_jobs(self, limit, checkpoint):
         url = f"{self._host}/jobs/poll"
-        return self.poll_paginate(url, limit, datetime.now(UTC), checkpoint)
+        return self.poll_paginate(url, limit, datetime.now(timezone.utc), checkpoint)
 
     def poll_paginate(self, url, limit, action_start_time, checkpoint):
         job_list = list()
         epoch_convert_time = None
         if checkpoint:
             if checkpoint.tzinfo is None:
-                checkpoint = checkpoint.replace(tzinfo=UTC)
+                checkpoint = checkpoint.replace(tzinfo=timezone.utc)
             epoch_convert_time = checkpoint.timestamp()
 
         if not epoch_convert_time:
@@ -103,7 +184,7 @@ class SplunkAttackAnalyzer:
         else:
             raise RuntimeError(f"Polling exceeded the {MAX_POLL_PAGES}-page safety limit")
 
-        job_list.sort(key=lambda job: job.get("UpdatedAt") or "")
+        job_list.sort(key=updated_at_sort_key)
         return job_list[:limit] if limit else job_list
 
     def get_engines(self):
@@ -158,13 +239,13 @@ class SplunkAttackAnalyzer:
         url = f"{self._host}/jobs/{job_id}/pdfreport"
         resp = requests.get(url, headers=self.get_header(), verify=self._verify, proxies=self._proxy, stream=True, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
-        return resp.content
+        return _read_bounded_response(resp)
 
     def download_artifact(self, artifact_path):
         url = f"{self._host}/jobs/artifacts/{artifact_path}"
         resp = requests.get(url, headers=self.get_header(), verify=self._verify, proxies=self._proxy, stream=True, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
-        return resp.content
+        return _read_bounded_response(resp)
 
     def format_parameters_for_submission(self, param_dict):
         if not param_dict:

@@ -13,13 +13,13 @@
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 
+import hashlib
 import json
 import sys
 
 # Phantom App imports
 import time
 import unicodedata
-from datetime import datetime
 
 import phantom.app as phantom
 import requests
@@ -28,7 +28,7 @@ from phantom.action_result import ActionResult
 from phantom.base_connector import BaseConnector
 from phantom.vault import Vault
 
-from phsplunkattackanalyzer import SplunkAttackAnalyzer
+from phsplunkattackanalyzer import SplunkAttackAnalyzer, normalize_updated_at, parse_updated_at, updated_at_sort_key
 from splunkattackanalyzer_consts import *
 
 
@@ -165,8 +165,28 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         if phantom.is_fail(ret_val):
             return self.get_status()
 
-        # Use the config to initialize fortisiem object to handle connections to the fortisiem server
-        self._splunkattackanalyzer = SplunkAttackAnalyzer(config)
+        try:
+            splunkattackanalyzer = SplunkAttackAnalyzer(config)
+        except ValueError as exc:
+            return self.set_status(phantom.APP_ERROR, str(exc))
+
+        api_token_fingerprint = hashlib.sha256(config["api_token"].encode()).hexdigest()
+        credential_binding = self._state.get("credential_binding")
+        if (
+            isinstance(credential_binding, dict)
+            and credential_binding.get("api_token_sha256") == api_token_fingerprint
+            and credential_binding.get("api_host") != splunkattackanalyzer._api_host
+        ):
+            return self.set_status(
+                phantom.APP_ERROR,
+                "The App URL changed while the API token remained unchanged. Rotate the token and update both fields together.",
+            )
+
+        self._state["credential_binding"] = {
+            "api_host": splunkattackanalyzer._api_host,
+            "api_token_sha256": api_token_fingerprint,
+        }
+        self._splunkattackanalyzer = splunkattackanalyzer
 
         return phantom.APP_SUCCESS
 
@@ -456,12 +476,12 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             checkpoint = self._state.get("UpdatedAt_Checkpoint")
             try:
                 if checkpoint:
-                    datetime_checkpoint = datetime.strptime(checkpoint, "%Y-%m-%dT%H:%M:%S.%fZ")
-            except:
+                    datetime_checkpoint = parse_updated_at(checkpoint)
+            except (TypeError, ValueError):
                 self.debug_print("State file is corrupted, resetting the file")
                 self.save_progress("State file is corrupted, resetting the file")
-                self._state = {"app_version": self.get_app_json().get("app_version")}
-                return self._handle_on_poll(params)
+                self._state.pop("UpdatedAt_Checkpoint", None)
+                self.save_state(self._state)
 
         ret_val, limit = _validate_integer(action_result, params.get("container_count", 0), "container_count")
         if phantom.is_fail(ret_val):
@@ -474,10 +494,13 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             return action_result.set_status(phantom.APP_ERROR, "Unable to get jobs")
         if payload:
             checkpoint = None
-            for job in sorted(payload, key=lambda item: item.get("UpdatedAt") or ""):
+            for job in sorted(payload, key=updated_at_sort_key):
                 if not self.add_to_container(job):
                     break
-                checkpoint = job.get("UpdatedAt")
+                try:
+                    checkpoint = normalize_updated_at(job.get("UpdatedAt"))
+                except (TypeError, ValueError):
+                    self.debug_print("Ignoring malformed or future UpdatedAt value while advancing the poll checkpoint")
             if not manual_polling:
                 if checkpoint:
                     self._state["UpdatedAt_Checkpoint"] = checkpoint
@@ -547,14 +570,17 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
         while True:
             try:
                 job_summary = self._splunkattackanalyzer.get_job(job_id)
+                job_state = job_summary.get("State")
 
-                if not timeout_in_minutes:
+                if job_state == "done":
                     return job_summary, action_result.set_status(phantom.APP_SUCCESS)
-                elif job_summary.get("State") == "done":
-                    return job_summary, action_result.set_status(phantom.APP_SUCCESS)
-                elif time.time() < start_time + timeout_in_minutes * 60:
+                elif timeout_in_minutes and time.time() < start_time + timeout_in_minutes * 60:
                     time.sleep(JOB_POLL_INTERVAL)
                     continue
+                elif not timeout_in_minutes:
+                    return None, action_result.set_status(
+                        phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_JOB_NOT_COMPLETE.format(job_state or "unknown")
+                    )
                 else:
                     return None, action_result.set_status(phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_TIMEOUT_ERROR)
             except Exception as e:
