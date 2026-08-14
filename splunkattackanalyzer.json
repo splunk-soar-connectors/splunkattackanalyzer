@@ -6558,6 +6558,10 @@
                 {
                     "data_path": "action_result.parameter.ph_0",
                     "data_type": "ph"
+                },
+                {
+                    "data_path": "action_result.parameter.archive_password",
+                    "data_type": "string"
                 }
             ],
             "render": {
@@ -6802,6 +6806,10 @@
                 {
                     "data_path": "action_result.parameter.ph_0",
                     "data_type": "ph"
+                },
+                {
+                    "data_path": "action_result.parameter.archive_password",
+                    "data_type": "string"
                 }
             ],
             "render": {
