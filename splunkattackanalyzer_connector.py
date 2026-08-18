@@ -575,6 +575,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                 if job_state == "done":
                     return job_summary, action_result.set_status(phantom.APP_SUCCESS)
                 elif timeout_in_minutes and time.time() < start_time + timeout_in_minutes * 60:
+                    self.send_progress(f"Waiting for job {job_id} to complete")
                     time.sleep(JOB_POLL_INTERVAL)
                     continue
                 elif not timeout_in_minutes:
