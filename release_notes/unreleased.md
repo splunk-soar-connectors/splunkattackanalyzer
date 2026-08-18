@@ -1,3 +1,1 @@
 **Unreleased**
-
-* Keep long-running job summary actions active by emitting progress while polling.
