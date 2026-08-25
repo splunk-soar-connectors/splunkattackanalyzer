@@ -41,6 +41,8 @@ SENSITIVE_REQUEST_HEADERS = {"authorization", "proxy-authorization", "cookie", "
 SENSITIVE_SHARING_FIELDS = {"sharetoken", "sharinglink"}
 PDF_SIGNATURE = b"%PDF-"
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+JPEG_SIGNATURE = b"\xff\xd8\xff"
+SCREENSHOT_SIGNATURES = ((PNG_SIGNATURE, "png"), (JPEG_SIGNATURE, "jpg"))
 
 
 def _strip_unicode_format_controls(value):
@@ -51,6 +53,13 @@ def _strip_unicode_format_controls(value):
 
 def _has_expected_download_signature(data, signature):
     return isinstance(data, (bytes, bytearray)) and bool(data) and data.startswith(signature)
+
+
+def _get_screenshot_extension(data):
+    for signature, extension in SCREENSHOT_SIGNATURES:
+        if _has_expected_download_signature(data, signature):
+            return extension
+    return None
 
 
 def _sanitize_persisted_data(value):
@@ -669,19 +678,22 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         try:
             forensics = self._splunkattackanalyzer.get_job_normalized_forensics(job_id)
+            screenshots = forensics.get("Screenshots") or []
+            screenshot_count = 0
 
-            for i, ss in enumerate(forensics.get("Screenshots", [])):
+            for i, ss in enumerate(screenshots):
                 self.save_progress(f"Downloading screenshot #{i}")
 
                 shot_data = self._splunkattackanalyzer.download_artifact(ss["ArtifactPath"])
-                if not _has_expected_download_signature(shot_data, PNG_SIGNATURE):
-                    return action_result.set_status(phantom.APP_ERROR, "Downloaded screenshot is empty or is not a PNG")
+                extension = _get_screenshot_extension(shot_data)
+                if extension is None:
+                    return action_result.set_status(phantom.APP_ERROR, "Downloaded screenshot is empty or is not a PNG or JPEG")
 
-                vault_detail = self._add_to_vault(shot_data, f"Splunk Attack Analyzer screenshot {job_id} #{i}.png")
-                vault_detail["file_name"] = f"Splunk Attack Analyzer screenshot {job_id} #{i}.png"
+                file_name = f"Splunk Attack Analyzer screenshot {job_id} #{i}.{extension}"
+                vault_detail = self._add_to_vault(shot_data, file_name)
+                vault_detail["file_name"] = file_name
                 action_result.add_data(vault_detail)
-
-            screenshot_count = i + 1
+                screenshot_count += 1
 
             action_result.append_to_message(f"Attached {screenshot_count} screenshots")
             action_result.update_summary({"screenshot_count": screenshot_count})
