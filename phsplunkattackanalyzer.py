@@ -15,7 +15,7 @@
 
 import json
 from datetime import datetime, timedelta, timezone
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 
 import requests
 
@@ -29,6 +29,14 @@ MAX_POLL_JOBS = 10000
 MAX_DOWNLOAD_SIZE = 100 * 1024 * 1024
 DOWNLOAD_CHUNK_SIZE = 1024 * 1024
 CHECKPOINT_FUTURE_TOLERANCE = timedelta(minutes=5)
+
+
+def _encode_path_segment(value):
+    """Encode caller-controlled data as one URL path segment."""
+
+    # quote leaves RFC 3986 unreserved periods unchanged; encode them too so a
+    # value consisting of "." or ".." cannot become a dot path segment.
+    return quote(str(value), safe="").replace(".", "%2E")
 
 
 def _normalize_app_url(app_url):
@@ -194,13 +202,13 @@ class SplunkAttackAnalyzer:
         return resp.json()
 
     def get_job(self, job_id):
-        url = f"{self._host}/jobs/{job_id}"
+        url = f"{self._host}/jobs/{_encode_path_segment(job_id)}"
         resp = requests.get(url, headers=self.get_header(), verify=self._verify, proxies=self._proxy, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
         return resp.json()
 
     def get_job_normalized_forensics(self, job_id):
-        url = f"{self._host}/jobs/{job_id}/forensics"
+        url = f"{self._host}/jobs/{_encode_path_segment(job_id)}/forensics"
         resp = requests.get(url, headers=self.get_header(), verify=self._verify, proxies=self._proxy, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
         return resp.json()
@@ -236,13 +244,13 @@ class SplunkAttackAnalyzer:
         return resp.json()
 
     def download_job_pdf(self, job_id):
-        url = f"{self._host}/jobs/{job_id}/pdfreport"
+        url = f"{self._host}/jobs/{_encode_path_segment(job_id)}/pdfreport"
         resp = requests.get(url, headers=self.get_header(), verify=self._verify, proxies=self._proxy, stream=True, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
         return _read_bounded_response(resp)
 
     def download_artifact(self, artifact_path):
-        url = f"{self._host}/jobs/artifacts/{artifact_path}"
+        url = f"{self._host}/jobs/artifacts/{_encode_path_segment(artifact_path)}"
         resp = requests.get(url, headers=self.get_header(), verify=self._verify, proxies=self._proxy, stream=True, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
         return _read_bounded_response(resp)
