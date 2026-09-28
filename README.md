@@ -66,7 +66,7 @@ This table lists the configuration variables required to operate Splunk Attack A
 VARIABLE | REQUIRED | TYPE | DESCRIPTION
 -------- | -------- | ---- | -----------
 **app_url** | optional | string | HTTPS app origin for Attack Analyzer. The hostname must start with app. and changing it requires rotating the API token. Defaults to https://app.twinwave.io |
-**api_token** | required | string | API token from the app |
+**api_token** | required | password | API token from the app |
 **since** | optional | numeric | Start of time range stated in hours. If not specified, the default is past 24 hours |
 
 ### Supported Actions
@@ -1275,7 +1275,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **user_agent** | optional | User agent for Web Analyzer runs (Select "Custom" to provide custom user agent) | string | |
 **internet_region** | optional | GeoIP-based exit region for Web Analyzer runs | string | |
 **custom_user_agent** | optional | Activated when user agent is "Custom" | string | |
-**archive_password** | optional | For password-protected archive files or for decrypting documents | string | |
+**archive_password** | optional | For password-protected archive files or for decrypting documents | password | |
 **profile** | optional | An optional profile name that defines the analysis behavior to be used during the analysis for this job | string | `splunk attack analyzer profile` |
 
 #### Action Output
@@ -1297,7 +1297,6 @@ action_result.message | string | | Submitted file |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 action_result.parameter.ph_0 | ph | | |
-action_result.parameter.archive_password | string | | |
 
 ## action: 'detonate url'
 
@@ -1314,7 +1313,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **user_agent** | optional | User agent for Web Analyzer runs (Select "Custom" to provide custom user agent) | string | |
 **internet_region** | optional | GeoIP-based exit region for Web Analyzer runs | string | |
 **custom_user_agent** | optional | Activated when user agent is "Custom" | string | |
-**archive_password** | optional | For password-protected archive files or for decrypting documents | string | |
+**archive_password** | optional | For password-protected archive files or for decrypting documents | password | |
 **profile** | optional | An optional profile name that defines the analysis behavior to be used during the analysis for this job | string | `splunk attack analyzer profile` |
 
 #### Action Output
@@ -1336,7 +1335,6 @@ action_result.message | string | | Submitted URL |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 action_result.parameter.ph_0 | ph | | |
-action_result.parameter.archive_password | string | | |
 
 ## action: 'get system tags'
 

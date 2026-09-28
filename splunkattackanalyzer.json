@@ -30,7 +30,7 @@
         },
         "api_token": {
             "description": "API token from the app",
-            "data_type": "string",
+            "data_type": "password",
             "required": true,
             "order": 1
         },
@@ -6432,7 +6432,7 @@
                 },
                 "archive_password": {
                     "description": "For password-protected archive files or for decrypting documents",
-                    "data_type": "string",
+                    "data_type": "password",
                     "order": 5
                 },
                 "profile": {
@@ -6558,10 +6558,6 @@
                 {
                     "data_path": "action_result.parameter.ph_0",
                     "data_type": "ph"
-                },
-                {
-                    "data_path": "action_result.parameter.archive_password",
-                    "data_type": "string"
                 }
             ],
             "render": {
@@ -6680,7 +6676,7 @@
                 },
                 "archive_password": {
                     "description": "For password-protected archive files or for decrypting documents",
-                    "data_type": "string",
+                    "data_type": "password",
                     "order": 5
                 },
                 "profile": {
@@ -6806,10 +6802,6 @@
                 {
                     "data_path": "action_result.parameter.ph_0",
                     "data_type": "ph"
-                },
-                {
-                    "data_path": "action_result.parameter.archive_password",
-                    "data_type": "string"
                 }
             ],
             "render": {
