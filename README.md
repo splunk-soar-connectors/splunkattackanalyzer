@@ -855,7 +855,7 @@ Get a job summary for a submitted job
 Type: **investigate** <br>
 Read only: **True**
 
-Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.
+If timeout is 0, the action returns the current job summary immediately, including pending and in-progress jobs.
 
 #### Action Parameters
 
