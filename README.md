@@ -4,7 +4,7 @@ Publisher: Splunk <br>
 Connector Version: 2.2.7 <br>
 Product Vendor: Splunk <br>
 Product Name: Splunk Attack Analyzer <br>
-Minimum Product Version: 6.4.0
+Minimum Product Version: 8.7.0
 
 This connector integrates with the Splunk Attack Analyzer platform to reduce the friction of repetitive manual tasks typically associated with investigating threats
 
@@ -855,7 +855,7 @@ Get a job summary for a submitted job
 Type: **investigate** <br>
 Read only: **True**
 
-Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.
+If timeout is 0, the action returns the current job summary immediately, including pending and in-progress jobs.
 
 #### Action Parameters
 
