@@ -19,7 +19,7 @@
     "utctime_updated": "2026-09-15T14:43:07.713816Z",
     "package_name": "phantom_splunkattackanalyzer",
     "main_module": "splunkattackanalyzer_connector.py",
-    "min_phantom_version": "8.7.0",
+    "min_phantom_version": "8.6.0",
     "app_wizard_version": "1.0.0",
     "configuration": {
         "app_url": {
@@ -4145,7 +4145,7 @@
             "action": "get job summary",
             "identifier": "splunk_attack_analyzer_get_job_summary",
             "description": "Get a job summary for a submitted job",
-            "verbose": "If timeout is 0, the action returns the current job summary immediately, including pending and in-progress jobs.",
+            "verbose": "Timeout parameter accepts integer value in minutes to wait for action to get finished (by default the value is 0), value 0 is for immediate output.",
             "type": "investigate",
             "read_only": true,
             "parameters": {

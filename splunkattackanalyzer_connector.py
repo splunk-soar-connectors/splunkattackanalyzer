@@ -574,7 +574,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
             return False
         return True
 
-    def _get_job_data(self, action_result, job_id, timeout_in_minutes, accept_incomplete=False):
+    def _get_job_data(self, action_result, job_id, timeout_in_minutes):
         start_time = time.time()
         while True:
             try:
@@ -587,8 +587,6 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
                     self.send_progress(f"Waiting for job {job_id} to complete")
                     time.sleep(JOB_POLL_INTERVAL)
                     continue
-                elif accept_incomplete and not timeout_in_minutes and job_state in ("pending", "inprogress"):
-                    return job_summary, action_result.set_status(phantom.APP_SUCCESS)
                 elif not timeout_in_minutes:
                     return None, action_result.set_status(
                         phantom.APP_ERROR, SPLUNK_ATTACK_ANALYZER_JOB_NOT_COMPLETE.format(job_state or "unknown")
@@ -611,7 +609,7 @@ class SplunkAttackAnalyzerConnector(BaseConnector):
 
         self.debug_print(f"Getting summary for job ID: {job_id}, timeout: {timeout_in_minutes}")
 
-        job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes, accept_incomplete=True)
+        job_summary, ret_val = self._get_job_data(action_result, job_id, timeout_in_minutes)
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
