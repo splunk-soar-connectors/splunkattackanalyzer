@@ -39,6 +39,17 @@ def _encode_path_segment(value):
     return quote(str(value), safe="").replace(".", "%2E")
 
 
+def _encode_artifact_path(artifact_path):
+    if not isinstance(artifact_path, str) or not artifact_path:
+        raise ValueError("Artifact path must be a non-empty relative path")
+
+    segments = artifact_path.split("/")
+    if any(segment in ("", ".", "..") for segment in segments):
+        raise ValueError("Artifact path contains invalid path segments")
+
+    return "/".join(_encode_path_segment(segment) for segment in segments)
+
+
 def _normalize_app_url(app_url):
     try:
         parsed = urlsplit(app_url)
@@ -250,7 +261,7 @@ class SplunkAttackAnalyzer:
         return _read_bounded_response(resp)
 
     def download_artifact(self, artifact_path):
-        url = f"{self._host}/jobs/artifacts/{_encode_path_segment(artifact_path)}"
+        url = f"{self._host}/jobs/artifacts/{_encode_artifact_path(artifact_path)}"
         resp = requests.get(url, headers=self.get_header(), verify=self._verify, proxies=self._proxy, stream=True, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
         return _read_bounded_response(resp)
